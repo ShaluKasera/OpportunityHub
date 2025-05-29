@@ -1,0 +1,44 @@
+const express = require("express");
+const router = express.Router();
+const {
+  jobSeekerSignup,
+  jobSeekerSignin,
+  getMyProfile,
+  updateSeekerProfile,
+  getAllJobs,
+  getJobById,
+  applyToJob,
+  getAppliedJobs,
+  getAppliedJobById,
+  getAcceptedJobs,
+} = require("../../controllers/authController/jobSeeker");
+const auth = require("../../middlewares/authMiddleware");
+const { authorizeRoles } = require("../../middlewares/roleMiddleware");
+
+router.post("/signup", jobSeekerSignup);
+router.post("/login", jobSeekerSignin);
+router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
+router.post("/update-profile", auth, authorizeRoles(["job_seeker"]), updateSeekerProfile);
+router.get("/all-jobs", auth, authorizeRoles(["job_seeker"]), getAllJobs);
+router.get("/job/:id", auth, authorizeRoles(["job_seeker"]), getJobById);
+router.post("/apply-job", auth, authorizeRoles(["job_seeker"]), applyToJob);
+router.get(
+  "/all-applied-job",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  getAppliedJobs
+);
+router.get(
+  "/all-applied-job",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  getAppliedJobById
+);
+router.get(
+  "/accepted-job",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  getAcceptedJobs
+);
+
+module.exports = router;
