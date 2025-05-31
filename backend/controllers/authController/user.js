@@ -1,14 +1,14 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { User } = require("../../models");
+const { User, Employer, JobSeeker } = require("../../models");
 const {
   sendOtpEmail,
   sendResetPasswordOtp,
 } = require("../../services/emailService/emailVerification");
 
-
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-const otpStore = new Map(); 
+const generateOTP = () =>
+  Math.floor(100000 + Math.random() * 900000).toString();
+const otpStore = new Map();
 
 const storeOtp = (email, otp) => {
   const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -18,16 +18,87 @@ const storeOtp = (email, otp) => {
 
 const isValidOtp = (email, otp) => {
   const storedOtps = otpStore.get(email) || [];
-  const latestValid = storedOtps.filter(entry => entry.expires > Date.now()).pop();
+ 
+  const latestValid = storedOtps
+    .filter((entry) => entry.expires > Date.now())
+    .pop();
+  
   return latestValid && latestValid.otp === otp;
 };
 
 const clearOtps = (email) => otpStore.delete(email);
 
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.isEmailVerified) {
+      return res
+        .status(403)
+        .json({ message: "Email not verified. Please verify your email." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: "Invalid password" });
+
+    let roleData = null;
+
+    if (user.role === "employer") {
+      const employer = await Employer.findOne({ where: { userId: user.id } });
+      if (!employer)
+        return res.status(404).json({ message: "Employer profile not found" });
+
+      if (!employer.isVerified) {
+        return res
+          .status(403)
+          .json({ message: "Employer account not verified by admin." });
+      }
+
+      roleData = { employer };
+    } else if (user.role === "job_seeker") {
+      const jobSeeker = await JobSeeker.findOne({ where: { userId: user.id } });
+      if (!jobSeeker)
+        return res
+          .status(404)
+          .json({ message: "Job seeker profile not found" });
+
+      roleData = { jobSeeker };
+    } else {
+      return res.status(403).json({ message: "Role not supported" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      ...roleData,
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
 
 const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
   try {
-    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
 
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -40,11 +111,12 @@ const verifyOtp = async (req, res) => {
     if (!valid) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
-    
+
+
     user.isEmailVerified = true;
     await user.save();
 
-    clearOtps(email); 
+    clearOtps(email);
 
     return res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {
@@ -76,7 +148,6 @@ const resendOtp = async (req, res) => {
   }
 };
 
-
 const forgotPassword = async (req, res) => {
   const { email, name } = req.body;
 
@@ -94,7 +165,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-
 const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
@@ -110,6 +180,7 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
+  loginUser,
   verifyOtp,
   resendOtp,
   forgotPassword,

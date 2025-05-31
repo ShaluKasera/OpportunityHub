@@ -105,67 +105,67 @@ const EmployerSignup = async (req, res) => {
   }
 };
 
-const employerSignin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// const employerSignin = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//     const user = await User.findOne({ where: { email } });
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
 
-    if (!user.isEmailVerified) {
-      return res
-        .status(403)
-        .json({ message: "Email not verified. Please verify your email." });
-    }
+//     if (!user.isEmailVerified) {
+//       return res
+//         .status(403)
+//         .json({ message: "Email not verified. Please verify your email." });
+//     }
 
-    if (user.role !== "employer") {
-      return res.status(403).json({ message: "Not authorized as an employer" });
-    }
+//     if (user.role !== "employer") {
+//       return res.status(403).json({ message: "Not authorized as an employer" });
+//     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid password" });
+//     }
 
-    const employer = await Employer.findOne({ where: { userId: user.id } });
-    if (!employer) {
-      return res.status(404).json({ message: "Employer profile not found" });
-    }
+//     const employer = await Employer.findOne({ where: { userId: user.id } });
+//     if (!employer) {
+//       return res.status(404).json({ message: "Employer profile not found" });
+//     }
 
-    if (!employer.isVerified) {
-      return res
-        .status(403)
-        .json({ message: "Employer account not verified by admin." });
-    }
+//     if (!employer.isVerified) {
+//       return res
+//         .status(403)
+//         .json({ message: "Employer account not verified by admin." });
+//     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+//     const token = jwt.sign(
+//       {
+//         id: user.id,
+//         email: user.email,
+//         role: user.role,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
 
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-      employer,
-    });
-  } catch (error) {
-    console.error("Employer Signin Error:", error);
-    return res.status(500).json({ message: "Server error", error });
-  }
-};
+//     return res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user.id,
+//         email: user.email,
+//         name: user.name,
+//         role: user.role,
+//       },
+//       employer,
+//     });
+//   } catch (error) {
+//     console.error("Employer Signin Error:", error);
+//     return res.status(500).json({ message: "Server error", error });
+//   }
+// };
 
 
 const updateEmployerProfile = async (req, res) => {
@@ -217,6 +217,13 @@ const getMyProfile = async (req, res) => {
       where: {
         userId,
       },
+      include: [
+        {
+          model: User,
+          as:"user",
+          attributes: ["name", "email"], 
+        },
+      ],
     });
     if (!profile) return res.status(404).json({ message: "Profile not found" });
     res.status(200).json(profile);
@@ -688,7 +695,7 @@ const updateApplicationStatus = async (req, res) => {
 };
 
 module.exports = {
-  employerSignin,
+  // employerSignin,
   EmployerSignup,
   getMyProfile,
   updateEmployerProfile,

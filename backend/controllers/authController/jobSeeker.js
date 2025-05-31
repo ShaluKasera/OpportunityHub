@@ -95,72 +95,78 @@ const jobSeekerSignup = async (req, res) => {
   }
 };
 
-const jobSeekerSignin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
+// const jobSeekerSignin = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = await User.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (!user.isEmailVerified) {
-      return res
-        .status(404)
-        .json({ message: "Email is not verified. Please verify the email" });
-    }
-    if (user.role !== "job_seeker") {
-      return res
-        .status(403)
-        .json({ message: "Not authorized as a job seeker" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+//     if (!user.isEmailVerified) {
+//       return res
+//         .status(404)
+//         .json({ message: "Email is not verified. Please verify the email" });
+//     }
+//     if (user.role !== "job_seeker") {
+//       return res
+//         .status(403)
+//         .json({ message: "Not authorized as a job seeker" });
+//     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid password" });
+//     }
 
-    const jobSeeker = await JobSeeker.findOne({ where: { userId: user.id } });
+//     const jobSeeker = await JobSeeker.findOne({ where: { userId: user.id } });
 
-    if (!jobSeeker) {
-      return res.status(404).json({ message: "Job seeker profile not found" });
-    }
+//     if (!jobSeeker) {
+//       return res.status(404).json({ message: "Job seeker profile not found" });
+//     }
 
-    const token = jwt.sign(
-      {
-        id:user.id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+//     const token = jwt.sign(
+//       {
+//         id:user.id,
+//         email: user.email,
+//         role: user.role,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
 
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-      jobSeeker,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
+//     return res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user.id,
+//         email: user.email,
+//         name: user.name,
+//         role: user.role,
+//       },
+//       jobSeeker,
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 const getMyProfile = async (req, res) => {
   const userId = req.user.id;
-  console.log(userId)
 
   try {
     const profile = await JobSeeker.findOne({
       where: {
         userId,
       },
+       include: [
+        {
+          model: User,
+          as:"user",
+          attributes: ["name", "email"], 
+        },
+      ],
     });
 
     if (!profile) return res.status(404).json({ message: "Profile not found" });
@@ -470,7 +476,7 @@ const getAcceptedJobs = async (req, res) => {
 
 module.exports = {
   jobSeekerSignup,
-  jobSeekerSignin,
+  // jobSeekerSignin,
   getMyProfile,
   updateSeekerProfile,
   getAllJobs,

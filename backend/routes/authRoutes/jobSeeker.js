@@ -16,9 +16,9 @@ const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
 
 router.post("/signup", jobSeekerSignup);
-router.post("/login", jobSeekerSignin);
+// router.post("/login", jobSeekerSignin);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
-router.post("/update-profile", auth, authorizeRoles(["job_seeker"]), updateSeekerProfile);
+router.put("/profile", auth, authorizeRoles(["job_seeker"]), updateSeekerProfile);
 router.get("/all-jobs", auth, authorizeRoles(["job_seeker"]), getAllJobs);
 router.get("/job/:id", auth, authorizeRoles(["job_seeker"]), getJobById);
 router.post("/apply-job", auth, authorizeRoles(["job_seeker"]), applyToJob);

@@ -22,10 +22,10 @@ const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
 
 router.post("/signup", EmployerSignup);
-router.post("/login", employerSignin);
+// router.post("/login", employerSignin);
 
 router.get("/profile", auth, authorizeRoles(["employer"]), getMyProfile);
-router.post('/update-profile',auth,authorizeRoles(["employer"]),updateEmployerProfile)
+router.put('/profile',auth,authorizeRoles(["employer"]),updateEmployerProfile)
 
 router.post("/post-job", auth, authorizeRoles(["employer"]), postJob);
 router.post("/update-job/:jobId", auth, authorizeRoles(["employer"]), updateJob);
