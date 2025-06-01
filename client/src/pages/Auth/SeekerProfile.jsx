@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import JobTabsSection from "./JobTabsSection";
 
 const SeekerProfile = () => {
+  // seeker profile
   const [user, setUser] = useState({
     profilePic: "",
     name: "",
@@ -21,19 +23,6 @@ const SeekerProfile = () => {
   });
 
   const [decoded, setDecoded] = useState(null);
-
-  const appliedJobs = [
-    { id: 1, title: "Frontend Developer", company: "Tech Corp" },
-    { id: 2, title: "Backend Engineer", company: "Code Labs" },
-  ];
-
-  const jobOffers = [
-    { id: 1, title: "Full Stack Developer", company: "Dev Solutions" },
-    { id: 2, title: "Backend Engineer", company: "Code Labs" },
-  ];
-
-  const [activeTab, setActiveTab] = useState("applied");
-
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isProfessionalEditOpen, setIsProfessionalEditOpen] = useState(false);
 
@@ -59,19 +48,15 @@ const SeekerProfile = () => {
           );
 
           const data = res.data;
-
           const userData = data.user || {};
 
-          
-
-          setUser((prev) => ({
-            ...prev,
+          setUser({
             name: userData.name,
             email: userData.email,
             profilePic:
               userData.profilePic ||
               "https://randomuser.me/api/portraits/lego/2.jpg",
-          }));
+          });
 
           setJobSeeker({
             domain: data.domain,
@@ -82,7 +67,6 @@ const SeekerProfile = () => {
             resumeUrl: data.resumeUrl,
             availabilityStatus: data.availabilityStatus,
           });
-
         } catch (error) {
           console.error("Failed to fetch profile:", error.message);
         }
@@ -138,7 +122,6 @@ const SeekerProfile = () => {
     }));
   };
 
-  // SAVE PROFILE BUTTON
   const handleSaveProfile = (e) => {
     e.preventDefault();
 
@@ -175,12 +158,57 @@ const SeekerProfile = () => {
     setIsProfessionalEditOpen(false);
   };
 
+  // Jobsections
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [jobOffers, setJobOffers] = useState([]); // currently dummy or reused
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          "http://localhost:8000/api/seeker/all-applied-job",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (res.data.success) {
+          const formattedJobs = res.data.applications.map((app) => ({
+            id: app.job.id,
+            title: app.job.title,
+            company: app.job.domain || "Unknown Company",
+          }));
+
+          setAppliedJobs(formattedJobs);
+          setJobOffers(formattedJobs); // Reusing for now
+        }
+      } catch (error) {
+        console.error("Error fetching applied jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppliedJobs();
+  }, []);
+
+  const handleViewDetails = (job) => {
+    console.log("Job details clicked:", job);
+    // Navigate to details page or open modal
+  };
+
+  if (loading) return <p className="p-4 text-gray-600">Loading jobs...</p>;
+
   return (
     <>
       <div className="container py-6 max-w-4xl mx-auto space-y-10">
         {/* Profile Section */}
-        <section className="relative bg-white p-6 rounded-xl shadow">
-          <p className="text-3xl font-bold mb-4 Ysabeau_Infant">Profile</p>
+        <section className="relative bg-white p-6 rounded-xl border shadow">
+          <p className="text-3xl font-bold mb-4">Profile</p>
           <button
             className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
             onClick={() => setIsProfileEditOpen(true)}
@@ -189,30 +217,27 @@ const SeekerProfile = () => {
           </button>
           <div className="flex items-center space-x-10 px-6">
             <img
-              src={user.profilePic || undefined}
+              src={user.profilePic}
               alt={`${user.name} profile`}
               className="w-24 h-24 rounded-full object-cover border-2 border-red-700"
             />
             <div>
               <h2 className="text-2xl font-extrabold">{user.name}</h2>
               <p className="text-gray-600">{user.email}</p>
-              <p className="text-gray-600">{user.location}</p>
+              <p className="text-gray-600">{jobSeeker.location}</p>
             </div>
           </div>
         </section>
 
         {/* Professional Details Section */}
-        <section className="relative bg-white p-6 rounded-xl shadow space-y-2">
-          <p className="text-3xl font-bold mb-4 Ysabeau_Infant">
-            Professional Details
-          </p>
+        <section className="relative bg-white p-6 rounded-xl border shadow space-y-2">
+          <p className="text-3xl font-bold mb-4">Professional Details</p>
           <button
             className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
             onClick={() => setIsProfessionalEditOpen(true)}
           >
             Edit
           </button>
-
           <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm">
             <div>
               <span className="font-semibold">Domain:</span>{" "}
@@ -227,7 +252,8 @@ const SeekerProfile = () => {
               {jobSeeker.experienceYears ?? "N/A"} years
             </div>
             <div>
-              <span className="font-semibold">Phone:</span> {jobSeeker.phone}
+              <span className="font-semibold">Phone:</span>{" "}
+              {jobSeeker.phone || "N/A"}
             </div>
             <div className="col-span-2">
               <span className="font-semibold">Skills:</span>{" "}
@@ -255,59 +281,22 @@ const SeekerProfile = () => {
                     : "text-gray-500"
                 }`}
               >
-                {jobSeeker.availabilityStatus.replace("_", " ").toUpperCase()}
+                {jobSeeker.availabilityStatus
+                  ?.replace("_", " ")
+                  .toUpperCase() || "N/A"}
               </span>
             </div>
           </div>
         </section>
 
         {/* Tabs */}
-        <section className="bg-white p-6 rounded-xl shadow">
-          <div className="flex space-x-4 border-b gap-4 border-gray-300 mb-6">
-            <button
-              onClick={() => setActiveTab("applied")}
-              className={`pb-2 font-semibold text-sm ${
-                activeTab === "applied"
-                  ? "border-b-2 border-red-700 text-red-700"
-                  : "text-gray-500"
-              }`}
-            >
-              Applied Jobs
-            </button>
-            <button
-              onClick={() => setActiveTab("offers")}
-              className={`pb-2 font-semibold text-sm ${
-                activeTab === "offers"
-                  ? "border-b-2 border-red-700 text-red-700"
-                  : "text-gray-500"
-              }`}
-            >
-              Job Offers
-            </button>
-          </div>
-
-          <ul className="space-y-4">
-            {(activeTab === "applied" && appliedJobs.length === 0) ||
-            (activeTab === "offers" && jobOffers.length === 0) ? (
-              <p className="text-gray-500">No jobs found.</p>
-            ) : (
-              (activeTab === "applied" ? appliedJobs : jobOffers).map((job) => (
-                <li
-                  key={job.id}
-                  className="p-4 border border-gray-200 rounded hover:shadow cursor-pointer"
-                >
-                  <h4 className="font-semibold">{job.title}</h4>
-                  <p className="text-gray-600">{job.company}</p>
-                </li>
-              ))
-            )}
-
-            {(activeTab === "applied" && appliedJobs.length === 0) ||
-            (activeTab === "offers" && jobOffers.length === 0) ? (
-              <p>No jobs found.</p>
-            ) : null}
-          </ul>
-        </section>
+        <div className="max-w-full border rounded-xl mx-auto mt-8">
+          <JobTabsSection
+            appliedJobs={appliedJobs}
+            jobOffers={jobOffers}
+            handleViewDetails={handleViewDetails}
+          />
+        </div>
       </div>
 
       {/* Profile Edit Modal */}
@@ -315,19 +304,19 @@ const SeekerProfile = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-[90%] max-w-md space-y-4 relative">
             <button
-              className="absolute top-2 right-4 text-red-600 !text-2xl font-bold"
+              className="absolute top-2 right-4 text-red-600 text-2xl font-bold"
               onClick={() => setIsProfileEditOpen(false)}
             >
               ×
             </button>
-            <p className="text-3xl font-bold Ysabeau_Infant ">Edit Profile</p>
+            <p className="text-2xl font-bold mb-4">Edit Profile</p>
             <input
               type="text"
               name="name"
               value={user.name}
               onChange={handleProfileChange}
               placeholder="Name"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
             />
             <input
               type="email"
@@ -335,7 +324,8 @@ const SeekerProfile = () => {
               value={user.email}
               onChange={handleProfileChange}
               placeholder="Email"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
+              disabled
             />
             <input
               type="text"
@@ -343,15 +333,14 @@ const SeekerProfile = () => {
               value={jobSeeker.location}
               onChange={handleProfessionalChange}
               placeholder="Location"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
             />
-
             <Button
               variant="outline-danger"
               onClick={handleSaveProfile}
-              className="w-full mt-2"
+              className="w-full mt-4"
             >
-              Save Changes
+              Save
             </Button>
           </div>
         </div>
@@ -362,53 +351,48 @@ const SeekerProfile = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-[90%] max-w-md space-y-4 relative">
             <button
-              className="absolute top-2 right-4 text-red-600 !text-2xl font-bold"
+              className="absolute top-2 right-4 text-red-600 text-2xl font-bold"
               onClick={() => setIsProfessionalEditOpen(false)}
             >
               ×
             </button>
-            <p className="text-3xl font-bold Ysabeau_Infant">
-              Edit Professional Details
-            </p>
-            <input
-              type="text"
-              name="domain"
-              value={jobSeeker.domain}
-              onChange={handleProfessionalChange}
-              placeholder="Domain"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
-            />
-            <input
-              type="text"
-              name="location"
-              value={jobSeeker.location}
-              onChange={handleProfessionalChange}
-              placeholder="Location"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
-            />
-            <input
-              type="number"
-              name="experienceYears"
-              value={jobSeeker.experienceYears}
-              onChange={handleProfessionalChange}
-              placeholder="Experience (years)"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
-            />
+            <p className="text-2xl font-bold mb-4">Edit Professional Details</p>
             <input
               type="text"
               name="phone"
               value={jobSeeker.phone}
               onChange={handleProfessionalChange}
               placeholder="Phone"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="text"
+              name="domain"
+              value={jobSeeker.domain}
+              onChange={handleProfessionalChange}
+              placeholder="Domain"
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="text"
+              name="experienceYears"
+              value={jobSeeker.experienceYears}
+              onChange={handleProfessionalChange}
+              placeholder="Experience (Years)"
+              className="w-full border p-2 rounded"
             />
             <input
               type="text"
               name="skills"
               value={jobSeeker.skills}
-              onChange={handleProfessionalChange}
-              placeholder="Phone"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              onChange={(e) =>
+                setJobSeeker((prev) => ({
+                  ...prev,
+                  skills: e.target.value.split(",").map((s) => s.trim()),
+                }))
+              }
+              placeholder="Skills (comma-separated)"
+              className="w-full border p-2 rounded"
             />
             <input
               type="text"
@@ -416,27 +400,23 @@ const SeekerProfile = () => {
               value={jobSeeker.resumeUrl}
               onChange={handleProfessionalChange}
               placeholder="Resume URL"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
             />
             <select
               name="availabilityStatus"
               value={jobSeeker.availabilityStatus}
               onChange={handleProfessionalChange}
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full border p-2 rounded"
             >
-              <option value="" default>
-                Select Availability
-              </option>
-              <option value="accepted">Accepted</option>
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
+              <option value="">Select Availability</option>
               <option value="available">Available</option>
+              <option value="employed">Employed</option>
+              <option value="unavailable">Unavailable</option>
             </select>
-
             <Button
               variant="outline-danger"
               onClick={handleSaveProfessionalDetail}
-              className="bg-red-700 text-red-700 px-4 py-2 !font-bold rounded w-full"
+              className="w-full mt-4"
             >
               Save
             </Button>
