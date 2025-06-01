@@ -1,7 +1,14 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import {
+  TextField,
+  InputLabel,
+  Typography,
+  Box,
+} from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+
 const SeekerSignup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -81,6 +88,7 @@ const SeekerSignup = () => {
           withCredentials: true,
         }
       );
+
       setFormData({
         name: "",
         email: "",
@@ -96,7 +104,6 @@ const SeekerSignup = () => {
       setProfilePreview(null);
 
       alert(response.data.message);
-      alert(response.data.message);
       setTimeout(() => {
         navigate("/verify-email", { state: { email } });
       }, 2000);
@@ -106,10 +113,9 @@ const SeekerSignup = () => {
       alert(serverMessage || "Signup failed");
 
       if (serverMessage === "User already exists") {
-        
         setTimeout(() => {
-        navigate("/verify-email", { state: { email: formData.email } });
-      }, 500);
+          navigate("/verify-email", { state: { email: formData.email } });
+        }, 500);
       }
     } finally {
       setIsSubmitting(false);
@@ -117,160 +123,168 @@ const SeekerSignup = () => {
   };
 
   return (
-    <div className="container">
-      <Form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-3xl !font-bold mb-4 Ysabeau_Infant">
-          Job Seeker Registration
-        </p>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 500, mx: "auto", p: 3 }}
+    >
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Job Seeker Registration
+      </Typography>
 
-        <Form.Group>
-          <Form.Label>Full Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            placeholder="Enter full name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Full Name"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            placeholder="Enter email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Email"
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Password</Form.Label>
-          <div className="relative">
-            <Form.Control
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="!placeholder-gray-400"
-            />
+      <TextField
+        fullWidth
+        label="Password"
+        type={showPassword ? "text" : "password"}
+        name="password"
+        value={formData.password}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+        InputProps={{
+          endAdornment: (
             <span
-              className="absolute right-3 top-2 cursor-pointer text-sm text-blue-600"
               onClick={() => setShowPassword(!showPassword)}
+              style={{
+                cursor: "pointer",
+                color: "red",
+                fontSize: "0.9em",
+              }}
             >
               {showPassword ? "Hide" : "Show"}
             </span>
-          </div>
-        </Form.Group>
+          ),
+        }}
+      />
 
-        <Form.Group>
-          <Form.Label>Phone</Form.Label>
-          <Form.Control
-            type="tel"
-            name="phone"
-            placeholder="Enter phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Phone"
+        type="tel"
+        name="phone"
+        value={formData.phone}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Domain</Form.Label>
-          <Form.Control
-            type="text"
-            name="domain"
-            placeholder="e.g. Web Development, Data Science"
-            value={formData.domain}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Domain"
+        name="domain"
+        placeholder="e.g. Web Development, Data Science"
+        value={formData.domain}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            type="text"
-            name="location"
-            placeholder="Enter your location"
-            value={formData.location}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Location"
+        name="location"
+        value={formData.location}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Experience (Years)</Form.Label>
-          <Form.Control
-            type="number"
-            name="experienceYears"
-            placeholder="e.g. 2"
-            value={formData.experienceYears}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Experience (Years)"
+        type="number"
+        name="experienceYears"
+        value={formData.experienceYears}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Skills</Form.Label>
-          <Form.Control
-            type="text"
-            name="skills"
-            placeholder="e.g. React, Node.js, Python"
-            value={formData.skills}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Skills"
+        name="skills"
+        placeholder="e.g. React, Node.js, Python"
+        value={formData.skills}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Resume URL</Form.Label>
-          <Form.Control
-            type="url"
-            name="resumeUrl"
-            placeholder="Link to your resume (Google Drive, etc.)"
-            value={formData.resumeUrl}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+      <TextField
+        fullWidth
+        label="Resume URL"
+        type="url"
+        name="resumeUrl"
+        placeholder="Link to your resume"
+        value={formData.resumeUrl}
+        onChange={handleChange}
+        margin="normal"
+        color="error" 
+        required
+      />
 
-        <Form.Group>
-          <Form.Label>Profile Picture</Form.Label>
-          <Form.Control
-            type="file"
-            name="profile"
-            accept="image/*"
-            onChange={handleChange}
-          />
-          {profilePreview && (
-            <div className="mt-2">
-              <img
-                src={profilePreview}
-                alt="Profile Preview"
-                className="h-20 object-contain"
-              />
-            </div>
-          )}
-        </Form.Group>
+      <Box mt={2}>
+        <InputLabel>Profile Picture</InputLabel>
+        <input
+          type="file"
+          name="profile"
+          accept="image/*"
+          color="error" 
+          onChange={handleChange}
+          style={{ marginTop: "8px" }}
+        />
+        {profilePreview && (
+          <Box mt={1}>
+            <img
+              src={profilePreview}
+              alt="Profile Preview"
+              style={{ height: 80, objectFit: "contain" }}
+            />
+          </Box>
+        )}
+      </Box>
 
-        <Button
-          variant="outline-danger"
-          type="submit"
-          className="w-full mt-3"
-          disabled={isSubmitting} // disable button while submitting
-        >
-          {isSubmitting ? "Registering..." : "Register as Job Seeker"}
-        </Button>
-      </Form>
-    </div>
+      <Button
+        variant="outline-danger"
+        color="error"
+        type="submit"
+        className="!w-full mt-3"
+        sx={{ mt: 3 }}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Registering..." : "Register as Job Seeker"}
+      </Button>
+    </Box>
   );
 };
 

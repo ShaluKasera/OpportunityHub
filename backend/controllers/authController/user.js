@@ -1,11 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { User, Employer, JobSeeker } = require("../../models");
+const { User, Employer, JobSeeker, Job } = require("../../models");
 const {
   sendOtpEmail,
   sendResetPasswordOtp,
 } = require("../../services/emailService/emailVerification");
-
+const { Op } = require("sequelize");
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 const otpStore = new Map();
@@ -18,11 +18,11 @@ const storeOtp = (email, otp) => {
 
 const isValidOtp = (email, otp) => {
   const storedOtps = otpStore.get(email) || [];
- 
+
   const latestValid = storedOtps
     .filter((entry) => entry.expires > Date.now())
     .pop();
-  
+
   return latestValid && latestValid.otp === otp;
 };
 
@@ -112,7 +112,6 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-
     user.isEmailVerified = true;
     await user.save();
 
@@ -179,10 +178,84 @@ const resetPassword = async (req, res) => {
   res.status(200).json({ message: "Password reset successfully" });
 };
 
+const getAllJobs = async (req, res) => {
+  try {
+    const {
+      title,
+      jobType,
+      minSalary,
+      maxSalary,
+      deadline,
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const whereClause = {};
+
+    if (title) {
+      whereClause.title = { [Op.like]: `%${title}%` };
+    }
+
+    if (jobType && jobType !== "") {
+      whereClause.jobType = jobType;
+    }
+
+    if (minSalary || maxSalary) {
+      whereClause.salary = {};
+      if (minSalary) {
+        whereClause.salary[Op.gte] = Number(minSalary);
+      }
+      if (maxSalary) {
+        whereClause.salary[Op.lte] = Number(maxSalary);
+      }
+    }
+
+    if (deadline) {
+      whereClause.deadline = { [Op.lte]: new Date(deadline) };
+    }
+
+    const offset = (page - 1) * limit;
+
+    const jobs = await Job.findAll({
+      where: whereClause,
+      limit: Number(limit),
+      offset: Number(offset),
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({
+      success: true,
+      jobs,
+    });
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching jobs",
+    });
+  }
+};
+
+const getJodById = async ( req,res) => {
+  const { id } = req.params;
+  try {
+    const job = await Job.findByPk(id);
+    if (!job) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+    res.json({ success: true, job });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+
 module.exports = {
   loginUser,
   verifyOtp,
   resendOtp,
   forgotPassword,
   resetPassword,
+  getAllJobs,
+  getJodById
 };

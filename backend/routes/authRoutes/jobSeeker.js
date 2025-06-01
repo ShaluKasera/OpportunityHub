@@ -5,7 +5,7 @@ const {
   jobSeekerSignin,
   getMyProfile,
   updateSeekerProfile,
-  getAllJobs,
+
   getJobById,
   applyToJob,
   getAppliedJobs,
@@ -19,7 +19,7 @@ router.post("/signup", jobSeekerSignup);
 // router.post("/login", jobSeekerSignin);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
 router.put("/profile", auth, authorizeRoles(["job_seeker"]), updateSeekerProfile);
-router.get("/all-jobs", auth, authorizeRoles(["job_seeker"]), getAllJobs);
+
 router.get("/job/:id", auth, authorizeRoles(["job_seeker"]), getJobById);
 router.post("/apply-job", auth, authorizeRoles(["job_seeker"]), applyToJob);
 router.get(
@@ -29,7 +29,7 @@ router.get(
   getAppliedJobs
 );
 router.get(
-  "/all-applied-job",
+  "/applied-jobs/:jobId",
   auth,
   authorizeRoles(["job_seeker"]),
   getAppliedJobById

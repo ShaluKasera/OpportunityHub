@@ -2,6 +2,14 @@ import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+
 const EmployerSignup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -78,6 +86,7 @@ const EmployerSignup = () => {
           withCredentials: true,
         }
       );
+
       setFormData({
         name: "",
         email: "",
@@ -113,130 +122,154 @@ const EmployerSignup = () => {
 
   return (
     <div className="container">
-      <Form onSubmit={handleSubmit} className="space-y-4 ">
+      <Form onSubmit={handleSubmit} className="space-y-4">
         <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
           Employer Registration
         </h2>
 
-        <Form.Group>
-          <Form.Label>Full Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            placeholder="Enter full name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Full Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Enter full name"
+          margin="normal"
+          color="error" 
+          required
+        />
 
-        <Form.Group>
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            placeholder="Enter email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="Enter email"
+          margin="normal"
+          color="error" 
+          required
+        />
+        <TextField
+          fullWidth
+          label="Password"
+          type={showPassword ? "text" : "password"}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          margin="normal"
+          color="error" 
+          required
+          InputProps={{
+            endAdornment: (
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  cursor: "pointer",
+                  color: "red",
+                  fontSize: "0.9em",
+                }}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </span>
+            ),
+          }}
+        />
 
-        <Form.Group>
-          <Form.Label>Password</Form.Label>
-          <div className="relative">
-            <Form.Control
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="!placeholder-gray-400"
-            />
-            <span
-              className="absolute right-3 top-2 cursor-pointer text-sm text-blue-600"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </span>
-          </div>
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Phone"
+          name="phone"
+          type="tel"
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="Enter phone number"
+          margin="normal"
+          color="error" 
+           required
+        />
 
-        <Form.Group>
-          <Form.Label>Phone</Form.Label>
-          <Form.Control
-            type="tel"
-            name="phone"
-            placeholder="Enter phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Company Name"
+          name="companyName"
+          value={formData.companyName}
+          onChange={handleChange}
+          placeholder="Enter company name"
+          margin="normal"
+          color="error" 
+           required
+        />
 
-        <Form.Group>
-          <Form.Label>Company Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="companyName"
-            placeholder="Enter company name"
-            value={formData.companyName}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label>Company Size</Form.Label>
-          <Form.Control
-            type="text"
+        <FormControl fullWidth margin="normal">
+          <InputLabel color="error">Company Size</InputLabel>
+          <Select
             name="companySize"
-            placeholder="e.g. 1-10, 11-50, 100+"
             value={formData.companySize}
             onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+            label="Company Size"
+             required
+             color="error" 
+            sx={{
+              "& .MuiMenuItem-root": {
+                "&:hover": {
+                  backgroundColor: "red",
+                  color: "white",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "red",
+                  color: "white",
+                },
+              },
+            }}
+          >
+            <MenuItem value="">Select company size</MenuItem>
+            <MenuItem value="1-10">1-10</MenuItem>
+            <MenuItem value="11-50">11-50</MenuItem>
+            <MenuItem value="51-200">51-200</MenuItem>
+            <MenuItem value="201-500">201-500</MenuItem>
+            <MenuItem value="500+">500+</MenuItem>
+          </Select>
+        </FormControl>
 
-        <Form.Group>
-          <Form.Label>Industry</Form.Label>
-          <Form.Control
-            type="text"
-            name="industry"
-            placeholder="e.g. Tech, Finance, Healthcare"
-            value={formData.industry}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Industry"
+          name="industry"
+          value={formData.industry}
+          onChange={handleChange}
+          placeholder="e.g. Tech, Finance, Healthcare"
+          margin="normal"
+          color="error" 
+           required
+        />
 
-        <Form.Group>
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            type="text"
-            name="location"
-            placeholder="Enter location"
-            value={formData.location}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Location"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          placeholder="Enter location"
+          margin="normal"
+           required
+           color="error" 
+        />
 
-        <Form.Group>
-          <Form.Label>Company Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            name="description"
-            rows={3}
-            placeholder="Brief description of your company"
-            value={formData.description}
-            onChange={handleChange}
-            className="!placeholder-gray-400"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Company Description"
+          name="description"
+          multiline
+          rows={3}
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Brief description of your company"
+          margin="normal"
+           required
+            color="error" 
+        />
 
         <Form.Group>
           <Form.Label>Company Logo</Form.Label>
@@ -244,8 +277,8 @@ const EmployerSignup = () => {
             type="file"
             name="companyLogo"
             accept="image/*"
+            color="error" 
             onChange={handleChange}
-            className="!placeholder-gray-400"
           />
           {logoPreview && (
             <div className="mt-2">
@@ -262,7 +295,7 @@ const EmployerSignup = () => {
           variant="outline-danger"
           type="submit"
           className="w-full mt-3"
-          disabled={isSubmitting} // disable button while submitting
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Registering..." : "Register as Employer"}
         </Button>

@@ -21,3 +21,14 @@
 .link:hover{
     color: red;
 }
+.form-select option:checked {
+  background-color: red !important;
+  color: white;
+}
+.form-select option:hover {
+  background-color: red !important;
+  color: white;
+}
+
+
+

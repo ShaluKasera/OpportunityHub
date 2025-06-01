@@ -8,6 +8,8 @@ import Signup from './pages/Auth/Signup';
 import Detail from './pages/JobDetails/Detail';
 import Profile from './pages/Auth/Profile';
 import EmailVerification from './pages/Auth/EmailVerification';
+import JobPage from './pages/Jobs/JobPage';
+import PostJob from './pages/Employer/PostJob';
 
 function App() {
  
@@ -18,8 +20,10 @@ function App() {
     <Route path='/' element={<Home/>}/>
     <Route path='/forgetPassword' element={<ForgetPassword/>}/>
     <Route path='/signup' element={<Signup/>}/>
-      <Route path='/details' element={<Detail/>}/>
+      <Route path="/job-details/:id" element={<Detail />} />
        <Route path='/profile' element={<Profile/>}/>
+       <Route path='/job' element={<JobPage/>}/>
+       <Route path='/post-job' element={<PostJob/>}/>
         <Route path='/verify-email' element={<EmailVerification/>}/>
    </Routes>
    </BrowserRouter>

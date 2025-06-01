@@ -1,46 +1,62 @@
 import { Link } from "react-router-dom";
 
+const calculateDaysLeft = (deadline) => {
+  if (!deadline) return "N/A";
+  const deadlineDate = new Date(deadline);
+  const currentDate = new Date();
+
+  const diffTime = deadlineDate - currentDate;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays > 0 ? diffDays : 0;
+};
+
 const Cards = ({ job }) => {
   return (
-    <div className="relative bg-white rounded-xl shadow p-4 hover:shadow-lg transition max-w-md mx-auto">
-      <div className="absolute top-1 right-3  text-gray-500 text-xs px-3  rounded-full">
-        {job.daysLeft} days left
+    <div className="relative w-full bg-white rounded-2xl shadow-md p-4 hover:shadow-xl transition-all duration-300 ease-in-out mx-auto overflow-hidden">
+      <div className="absolute top-2 right-3 text-xs text-gray-500 px-3 py-1 bg-gray-100 rounded-full shadow-sm whitespace-nowrap">
+        {calculateDaysLeft(job.deadline)} days left
       </div>
 
-      <div className="flex items-center space-x-3 mb-2">
+      <div className="flex items-center space-x-3 mb-3 overflow-hidden">
         <img
-          src={job.logo}
-          alt={`${job.company} logo`}
-          className="w-10 h-10 object-contain rounded"
+          src="https://randomuser.me/api/portraits/lego/2.jpg"
+          alt="Company Logo"
+          className="w-12 h-12 object-cover rounded-full shrink-0 border"
         />
-
-        <div className="flex flex-wrap items-center space-x-2 text-gray-700 text-sm font-medium">
-          <span>{job.company}</span>
-          <span className="text-gray-400">•</span>
-          <span>{job.location}</span>
+        <div className="flex flex-col">
+          <span className="text-base font-semibold text-gray-800 truncate max-w-[10rem]">
+            {job.title}
+          </span>
+          <span className="text-sm text-gray-500 truncate max-w-[10rem]">
+            {job.location}
+          </span>
         </div>
       </div>
 
-      <p className="text-3xl font-extrabold mb-2 Ysabeau_Infant">{job.title}</p>
+      <p className="text-2xl font-bold text-red-700 mb-2 Ysabeau_Infant truncate">
+        {job.domain}
+      </p>
 
-      {/* Job description */}
-      <p className="text-gray-600 mb-4 text-sm">{job.description}</p>
+      <div className="text-gray-600 text-sm mb-4 h-10 overflow-y-auto break-words pr-1 scrollbar-thin scrollbar-thumb-gray-300">
+        {job.description}
+      </div>
 
-      {/* Openings, Job type, Salary */}
-      <div className="flex space-x-2  text-xs font-semibold mb-4">
-        <span className=" rounded-2xl bg-red-400 py-1 px-2 text-white">
+      <div className="flex flex-wrap gap-2 text-xs font-semibold mb-4">
+        <span className="bg-red-500 text-white px-2 py-1 rounded-full">
           {job.openings} openings
         </span>
-        <span className=" rounded-2xl bg-gray-200 py-1 px-2 ">{job.type}</span>
-        <span className=" rounded-2xl bg-gray-200 py-1 px-2 ">
-          {job.salary}
+        <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+          {job.jobType}
+        </span>
+        <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
+          {job.salary?.toLocaleString() ?? "N/A"}
         </span>
       </div>
 
-      {/* View Details button */}
       <Link
-        to="/details"
-        className="block w-full text-center !no-underline  bg-white border-2 border-red-700 !text-red-700 py-2 rounded hover:!bg-red-700 hover:!text-white transition font-semibold  "  
+        to={`/job-details/${job.id}`}
+        className="block  text-center !no-underline !text-red-700 border-2 border-red-700 py-2 rounded-xl hover:bg-red-700 hover:!text-white transition-all duration-700 Ysabeau_Infant  font-bold text-xl"
       >
         View Details
       </Link>

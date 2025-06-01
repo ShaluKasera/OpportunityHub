@@ -1,20 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import Layout from "../../components/Layout/Layout";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Detail = () => {
-  // Dummy data for now – replace with dynamic data as needed
-  const job = {
-    title: "Frontend Developer",
-    openings: 2,
-    jobType: "Full time",
-    salary: "$200-$300",
-    description:
-      "We are looking for a skilled Frontend Developer to join our growing team. You will be responsible for building responsive and user-friendly interfaces using modern frameworks.",
-    domain: "Web Development",
-    experienceRequired: "1-3 years",
-    skills: ["React", "JavaScript", "CSS", "HTML"],
-    deadline: "2025-06-15T00:00:00Z",
-  };
+  const { id } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
+  const isLoggedIn = !!localStorage.getItem("token");
 
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-US", {
@@ -23,8 +19,65 @@ const Detail = () => {
       day: "numeric",
     });
 
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/user/job/${id}`);
+        if (res.data.success) {
+          setJob(res.data.job);
+        } else {
+          setJob(null);
+        }
+      } catch (error) {
+        console.error("Error fetching job:", error);
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id]);
+
+  const handleApply = async () => {
+    try {
+      setApplying(true);
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        "http://localhost:8000/api/seeker/apply-job",
+        {
+          jobId: id,
+          coverLetter:
+            "I'm interested in this job and believe I can contribute effectively.",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(res.data.message || "Applied successfully");
+    } catch (err) {
+      console.error("Apply job error:", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Failed to apply to job");
+      }
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  if (loading)
+    return <p className="p-6 text-gray-600">Loading job details...</p>;
+  if (!job) return <p className="p-6 text-red-600">Job not found.</p>;
+
   return (
     <Layout>
+      <ToastContainer position="top-right" />
       <div className="container py-6">
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -32,15 +85,27 @@ const Detail = () => {
               {job.title}
             </p>
             <div className="flex space-x-4 text-xs font-semibold">
-              <span className="text-md text-red-700">{job.openings} openings</span>
+              <span className="text-md text-red-700">
+                {job.openings} openings
+              </span>
               <span className="text-md text-gray-500">{job.jobType}</span>
               <span className="text-md text-green-700">{job.salary}</span>
             </div>
           </div>
 
-          <button className="px-6 py-2 bg-red-700 text-white !rounded-3xl hover:!text-red-700 border-2 border-red-700 hover:border-red-700 hover:bg-white duration-300">
-            Apply Now
-          </button>
+          {isLoggedIn && (
+            <button
+              onClick={handleApply}
+              disabled={applying}
+              className={`px-6 py-2 ${
+                applying
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-red-700 hover:bg-white hover:text-red-700"
+              } text-white !rounded-3xl border-2 hover:!text-red-700 border-red-700 hover:border-red-700 duration-300`}
+            >
+              {applying ? "Applying..." : "Apply Now"}
+            </button>
+          )}
         </div>
 
         <p className="font-semibold mb-1">Job Description</p>

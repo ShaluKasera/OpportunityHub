@@ -126,7 +126,7 @@ const Header = () => {
       {!user && (
         <ul className="flex space-x-6 items-center">
           <li><Link to="/" className="link">Home</Link></li>
-          <li><Link to="/" className="link">Jobs</Link></li>
+          <li><Link to="/job" className="link">Jobs</Link></li>
           <li>
             <button className="link bg-transparent border-0 p-0" onClick={() => setShowLogin(true)}>
               Login
@@ -135,7 +135,7 @@ const Header = () => {
           <li><Link to="/signup" className="link">Signup</Link></li>
         </ul>
       )}
-
+    {/* login modal */}
       <Modal
         show={showLogin}
         onHide={() => setShowLogin(false)}

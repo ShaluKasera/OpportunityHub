@@ -1,7 +1,8 @@
-const { User, JobSeeker,Job,JobApplication } = require("../../models");
+const { User, JobSeeker, Job, JobApplication } = require("../../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { sequelize } = require("../../config/mysql/sequelize");
 const {
   sendOtpEmail,
 } = require("../../services/emailService/emailVerification");
@@ -9,6 +10,7 @@ const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
 const jobSeekerSignup = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const {
       name,
@@ -46,23 +48,29 @@ const jobSeekerSignup = async (req, res) => {
     const otp = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      isEmailVerified: false,
-      role: "job_seeker",
-    });
+    const user = await User.create(
+      {
+        name,
+        email,
+        password: hashedPassword,
+        isEmailVerified: false,
+        role: "job_seeker",
+      },
+      { transaction: t }
+    );
 
-    const jobSeeker = await JobSeeker.create({
-      userId: user.id,
-      phone,
-      domain,
-      location,
-      experienceYears,
-      skills,
-      resumeUrl,
-    });
+    const jobSeeker = await JobSeeker.create(
+      {
+        userId: user.id,
+        phone,
+        domain,
+        location,
+        experienceYears,
+        skills,
+        resumeUrl,
+      },
+      { transaction: t }
+    );
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
@@ -78,6 +86,7 @@ const jobSeekerSignup = async (req, res) => {
     });
 
     await sendOtpEmail(email, otp, name);
+    await t.commit();
 
     return res.status(201).json({
       message: "Signup successful",
@@ -160,11 +169,11 @@ const getMyProfile = async (req, res) => {
       where: {
         userId,
       },
-       include: [
+      include: [
         {
           model: User,
-          as:"user",
-          attributes: ["name", "email"], 
+          as: "user",
+          attributes: ["name", "email"],
         },
       ],
     });
@@ -179,6 +188,7 @@ const getMyProfile = async (req, res) => {
 };
 
 const updateSeekerProfile = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const userId = req.user.id;
     const {
@@ -192,11 +202,15 @@ const updateSeekerProfile = async (req, res) => {
     } = req.body;
 
     if (name) {
-      await User.update({ name }, { where: { id: userId } });
+      await User.update({ name }, { where: { id: userId }, transaction: t });
     }
 
-    const jobSeeker = await JobSeeker.findOne({ where: { userId } });
+    const jobSeeker = await JobSeeker.findOne({
+      where: { userId },
+      transaction: t,
+    });
     if (!jobSeeker) {
+      await t.rollback();
       return res.status(404).json({ message: "Employer profile not found" });
     }
 
@@ -209,11 +223,12 @@ const updateSeekerProfile = async (req, res) => {
     if (resumeUrl) updateData.resumeUrl = resumeUrl;
 
     if (Object.keys(updateData).length > 0) {
-      await JobSeeker.update(updateData, { where: { userId } });
+      await JobSeeker.update(updateData, { where: { userId }, transaction: t });
     }
-
+    await t.commit();
     return res.status(200).json({ message: "Profile updated successfully" });
   } catch (error) {
+    await t.rollback();
     console.error("Update Profile Error:", error);
     return res.status(500).json({ message: "Server error", err: error });
   }
@@ -304,38 +319,54 @@ const getJobById = async (req, res) => {
 };
 
 const applyToJob = async (req, res) => {
+  const t = await sequelize.transaction(); 
   try {
     const { jobId, coverLetter } = req.body;
     const jobSeekerId = req.user.id;
 
-    const job = await Job.findByPk(jobId);
+    // ✅ Check if the user has a valid job seeker profile
+    const jobSeeker = await JobSeeker.findOne({ where: { userId: jobSeekerId }, transaction: t });
+    if (!jobSeeker) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Job seeker profile not found" });
+    }
+
+    const job = await Job.findByPk(jobId, { transaction: t });
     if (!job) {
+      await t.rollback();
       return res.status(404).json({ success: false, message: "Job not found" });
     }
 
     const existingApplication = await JobApplication.findOne({
-      where: { jobId, jobSeekerId },
+      where: { jobId, jobSeekerId: jobSeeker.id },
+      transaction: t,
     });
 
     if (existingApplication) {
+      await t.rollback(); 
       return res.status(400).json({
         success: false,
         message: "You have already applied to this job",
       });
     }
 
-    const application = await JobApplication.create({
-      jobId,
-      jobSeekerId,
-      coverLetter,
-    });
+    const application = await JobApplication.create(
+      {
+        jobId,
+        jobSeekerId: jobSeeker.id,
+        coverLetter,
+      },
+      { transaction: t }
+    );
 
+    await t.commit(); 
     return res.status(201).json({
       success: true,
       message: "Application submitted successfully",
       application,
     });
   } catch (error) {
+    await t.rollback(); 
     console.error("Error applying to job:", error);
     res.status(500).json({
       success: false,
@@ -344,16 +375,29 @@ const applyToJob = async (req, res) => {
   }
 };
 
+
 const getAppliedJobs = async (req, res) => {
   try {
-    const jobSeekerId = req.user.id;
+    const userId = req.user.id;
+    const jobSeeker = await JobSeeker.findOne({
+      where: { userId: userId },
+    });
+
+    if (!jobSeeker) {
+      return res.status(404).json({
+        success: false,
+        message: "Job seeker profile not found",
+      });
+    }
+
+    const jobSeekerId = jobSeeker.id;
 
     const applications = await JobApplication.findAll({
       where: { jobSeekerId },
       include: [
         {
           model: Job,
-          as:"job",
+          as: "job",
           attributes: [
             "id",
             "title",
@@ -383,20 +427,34 @@ const getAppliedJobs = async (req, res) => {
   }
 };
 
+
 const getAppliedJobById = async (req, res) => {
   try {
-    const jobSeekerId = req.user.id;
-    const { jobId } = req.body;
+    const userId = req.user.id;
+    const { jobId } = req.params;
+
+    const jobSeeker = await JobSeeker.findOne({
+      where: { userId: userId },
+    });
+
+    if (!jobSeeker) {
+      return res.status(404).json({
+        success: false,
+        message: "Job seeker profile not found",
+      });
+    }
+
+    const jobSeekerId = jobSeeker.id;
 
     const application = await JobApplication.findOne({
       where: {
-        jobId,
-        jobSeekerId,
+        jobId: jobId,
+        jobSeekerId: jobSeekerId,
       },
       include: [
         {
           model: Job,
-          as:"job",
+          as: "job",
           attributes: [
             "id",
             "title",
@@ -444,7 +502,7 @@ const getAcceptedJobs = async (req, res) => {
       include: [
         {
           model: Job,
-          as:"job",
+          as: "job",
           attributes: [
             "id",
             "title",
