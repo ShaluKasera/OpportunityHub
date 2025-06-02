@@ -1,4 +1,4 @@
-const { User, JobSeeker, Job, JobApplication } = require("../../models");
+const { User, JobSeeker, Job, JobApplication,JobOffer,Employer } = require("../../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -532,6 +532,48 @@ const getAcceptedJobs = async (req, res) => {
   }
 };
 
+const getJobOffersForSeeker = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const jobSeeker = await JobSeeker.findOne({
+      where: { userId },
+    });
+
+    if (!jobSeeker) {
+      return res.status(404).json({ message: "Job seeker not found" });
+    }
+
+   
+    const offers = await JobOffer.findAll({
+      where: { jobSeekerId: jobSeeker.id },
+      include: [
+        {
+          model: Job,
+          as: "job",
+        },
+        {
+          model: Employer,
+          as: "employer",
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["name", "email"],
+            },
+          ],
+        },
+      ],
+      order: [["sentAt", "DESC"]],
+    });
+
+    res.status(200).json(offers);
+  } catch (error) {
+    console.error("Error fetching job offers for seeker:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   jobSeekerSignup,
   // jobSeekerSignin,
@@ -543,4 +585,5 @@ module.exports = {
   getAppliedJobs,
   getAppliedJobById,
   getAcceptedJobs,
+  getJobOffersForSeeker,
 };

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   jobSeekerSignup,
-  jobSeekerSignin,
+  // jobSeekerSignin,
   getMyProfile,
   updateSeekerProfile,
 
@@ -11,6 +11,7 @@ const {
   getAppliedJobs,
   getAppliedJobById,
   getAcceptedJobs,
+  getJobOffersForSeeker,
 } = require("../../controllers/authController/jobSeeker");
 const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
@@ -39,6 +40,12 @@ router.get(
   auth,
   authorizeRoles(["job_seeker"]),
   getAcceptedJobs
+);
+router.get(
+  "/job-offers",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  getJobOffersForSeeker
 );
 
 module.exports = router;

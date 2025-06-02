@@ -400,7 +400,7 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
-    // Fetch employer and job inside transaction
+   
     const employer = await Employer.findOne({
       where: { userId },
       include: [{ model: User, as: "user", attributes: ["name", "email"] }],

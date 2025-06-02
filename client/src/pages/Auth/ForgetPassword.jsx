@@ -48,7 +48,7 @@ const ForgetPassword = () => {
       setLoading(true);
       const response = await axios.post("http://localhost:8000/api/user/forgot-password", {
         email,
-        name: email.split("@")[0], // Assuming no separate name field
+        name: email.split("@")[0], 
       });
       alert(response.data.message);
       setStep(2);
@@ -66,7 +66,6 @@ const ForgetPassword = () => {
       return;
     }
 
-    // Just go to next step — actual OTP verification is done during resetPassword
     setStep(3);
   };
 

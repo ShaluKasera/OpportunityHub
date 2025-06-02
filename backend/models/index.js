@@ -132,6 +132,24 @@ JobOffer.belongsTo(JobSeeker, {
   constraints: true,
 });
 
+// ========== EMPLOYER → JOB OFFERS ==========
+Employer.hasMany(JobOffer, {
+  foreignKey: "employerId",
+  as: "jobOffers",            
+  onDelete: "CASCADE",        
+  hooks: true,                
+  constraints: true,          
+});
+
+
+JobOffer.belongsTo(Employer, {
+  foreignKey: "employerId",
+  as: "employer",             
+  onDelete: "CASCADE",
+  hooks: true,
+  constraints: true,
+});
+
 module.exports = {
   User,
   Employer,
