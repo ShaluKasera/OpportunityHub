@@ -5,13 +5,14 @@ const {
   // jobSeekerSignin,
   getMyProfile,
   updateSeekerProfile,
-
   getJobById,
   applyToJob,
   getAppliedJobs,
   getAppliedJobById,
   getAcceptedJobs,
   getJobOffersForSeeker,
+  getJobOfferById,
+  updateJobOfferStatus,
 } = require("../../controllers/authController/jobSeeker");
 const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
@@ -19,7 +20,12 @@ const { authorizeRoles } = require("../../middlewares/roleMiddleware");
 router.post("/signup", jobSeekerSignup);
 // router.post("/login", jobSeekerSignin);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
-router.put("/profile", auth, authorizeRoles(["job_seeker"]), updateSeekerProfile);
+router.put(
+  "/profile",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  updateSeekerProfile
+);
 
 router.get("/job/:id", auth, authorizeRoles(["job_seeker"]), getJobById);
 router.post("/apply-job", auth, authorizeRoles(["job_seeker"]), applyToJob);
@@ -47,5 +53,14 @@ router.get(
   authorizeRoles(["job_seeker"]),
   getJobOffersForSeeker
 );
+router.get(
+  "/job-offers/:id",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  getJobOfferById
+);
+router.put("/job-offers/:id", auth,
+  authorizeRoles(["job_seeker"]), updateJobOfferStatus);
+
 
 module.exports = router;

@@ -1,9 +1,18 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-const JobTabsSection = ({ appliedJobs = [], jobOffers = [], handleViewDetails }) => {
+const JobTabsSection = ({
+  appliedJobs = [],
+  jobOffers = [],
+  appliedJobsLoading,
+  jobOffersLoading,
+  handleViewDetails,
+}) => {
   const [activeTab, setActiveTab] = useState("applied");
 
   const jobsToDisplay = activeTab === "applied" ? appliedJobs : jobOffers;
+  const isLoading =
+    activeTab === "applied" ? appliedJobsLoading : jobOffersLoading;
 
   return (
     <section className="bg-white p-6 rounded-xl shadow">
@@ -30,11 +39,13 @@ const JobTabsSection = ({ appliedJobs = [], jobOffers = [], handleViewDetails })
         </button>
       </div>
 
-      <ul className="space-y-4">
-        {jobsToDisplay.length === 0 ? (
-          <p className="text-gray-500">No jobs found.</p>
-        ) : (
-          jobsToDisplay.map((job) => (
+      {isLoading ? (
+        <p className="text-gray-500">Loading jobs...</p>
+      ) : jobsToDisplay.length === 0 ? (
+        <p className="text-gray-500">No jobs found.</p>
+      ) : (
+        <ul className="space-y-4">
+          {jobsToDisplay.map((job) => (
             <li
               key={job.id}
               className="p-4 border border-gray-200 rounded hover:shadow transition-shadow"
@@ -44,17 +55,22 @@ const JobTabsSection = ({ appliedJobs = [], jobOffers = [], handleViewDetails })
                   <h4 className="font-semibold text-lg">{job.title}</h4>
                   <p className="text-gray-600">{job.company}</p>
                 </div>
-                <button
-                  onClick={() => handleViewDetails(job)}
-                  className="text-sm text-red-700 border-2 border-red-700 hover:bg-red-700 px-4 py-2 !rounded-2xl hover:text-white font-bold transition-all duration-500"
+                <Link
+                  to={
+                    activeTab === "applied"
+                      ? `/applied-job-details/${job.id}`
+                      : `/offered-job-details/${job.jobOfferId}`
+                  }
+                  className="!no-underline !text-red-700 border-2 border-red-700 py-2 rounded-xl hover:bg-red-700 px-4 hover:!text-white transition-all duration-700 Ysabeau_Infant font-bold text-xl"
                 >
                   View Details
-                </button>
+                </Link>
+                 
               </div>
             </li>
-          ))
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
     </section>
   );
 };

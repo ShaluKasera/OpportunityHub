@@ -25,6 +25,7 @@ const SeekerProfile = () => {
   const [decoded, setDecoded] = useState(null);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isProfessionalEditOpen, setIsProfessionalEditOpen] = useState(false);
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -160,8 +161,9 @@ const SeekerProfile = () => {
 
   // Jobsections
   const [appliedJobs, setAppliedJobs] = useState([]);
-  const [jobOffers, setJobOffers] = useState([]); // currently dummy or reused
-  const [loading, setLoading] = useState(true);
+  const [jobOffers, setJobOffers] = useState([]);
+  const [appliedJobsLoading, setAppliedJobsLoading] = useState(true);
+  const [jobOffersLoading, setJobOffersLoading] = useState(true);
 
   useEffect(() => {
     const fetchAppliedJobs = async () => {
@@ -184,24 +186,56 @@ const SeekerProfile = () => {
           }));
 
           setAppliedJobs(formattedJobs);
-          setJobOffers(formattedJobs); // Reusing for now
         }
       } catch (error) {
         console.error("Error fetching applied jobs:", error);
       } finally {
-        setLoading(false);
+        setAppliedJobsLoading(false);
       }
     };
 
     fetchAppliedJobs();
   }, []);
 
-  const handleViewDetails = (job) => {
-    console.log("Job details clicked:", job);
-    // Navigate to details page or open modal
+  useEffect(() => {
+  const fetchOfferedJobs = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        "http://localhost:8000/api/seeker/job-offers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        const formattedJobs = res.data.jobOffers.map((app) => ({
+          jobId: app.job.id,              
+          jobOfferId: app.id,              
+          title: app.job.title,
+          company: app.job.domain || "Unknown Company",
+        }));
+
+        setJobOffers(formattedJobs);
+        console.log(formattedJobs);
+      }
+    } catch (error) {
+      console.error("Error fetching offered jobs:", error);
+    } finally {
+      setJobOffersLoading(false);
+    }
   };
 
-  if (loading) return <p className="p-4 text-gray-600">Loading jobs...</p>;
+  fetchOfferedJobs();
+}, []);
+
+
+  const handleViewDetails = (job) => {
+    console.log("Job details clicked:", job);
+  };
+
 
   return (
     <>
@@ -295,6 +329,8 @@ const SeekerProfile = () => {
             appliedJobs={appliedJobs}
             jobOffers={jobOffers}
             handleViewDetails={handleViewDetails}
+            appliedJobsLoading={appliedJobsLoading}
+            jobOffersLoading={jobOffersLoading}
           />
         </div>
       </div>

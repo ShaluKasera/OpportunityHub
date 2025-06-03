@@ -10,12 +10,14 @@ const {
   updateJob,
   deleteJob,
   getAllJobs,
+  getPostedJobById,
   sendJobOffersToRelevantSeekers,
   getAllJobSeekersOffered,
   getAllAcceptedJobSeekers,
   getAcceptedJobSeekerDetails,
   getApplicationsByJobId,
   updateApplicationStatus,
+  getAllApplications,
 } = require("../../controllers/authController/employer");
 
 const auth = require("../../middlewares/authMiddleware");
@@ -31,6 +33,7 @@ router.post("/post-job", auth, authorizeRoles(["employer"]), postJob);
 router.post("/update-job/:jobId", auth, authorizeRoles(["employer"]), updateJob);
 router.delete("/delete-job/:jobId", auth, authorizeRoles(["employer"]), deleteJob);
 router.get("/posted-joblist", auth, authorizeRoles(["employer"]), getAllJobs);
+router.get("/posted-joblist/:jobId", auth, authorizeRoles(["employer"]), getPostedJobById);
 
 router.post(
   "/send-jobOffer",
@@ -73,4 +76,11 @@ router.post(
   authorizeRoles(["employer"]),
   updateApplicationStatus
 );
+router.get(
+  "/applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getAllApplications
+);
+
 module.exports = router;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../../components/Layout/Layout";
-import SeekerProfile from "./SeekerProfile";
-import EmployerProfile from "./EmployerProfile";
+import SeekerProfile from "../Seeker/SeekerProfile";
+import EmployerProfile from "../Employer/EmployerProfile";
 import {jwtDecode} from "jwt-decode";
 
 const Profile = () => {

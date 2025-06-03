@@ -8,7 +8,8 @@ import {
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
-
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 const SeekerSignup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -102,20 +103,21 @@ const SeekerSignup = () => {
         profile: null,
       });
       setProfilePreview(null);
+      toast.success(response.data.message || "Registered successfully!");
 
-      alert(response.data.message);
       setTimeout(() => {
         navigate("/verify-email", { state: { email } });
       }, 2000);
     } catch (error) {
       const serverMessage = error.response?.data?.message;
       console.error("Signup error:", error.response?.data || error.message);
-      alert(serverMessage || "Signup failed");
+      toast.error(serverMessage || "Registeration Failed!");
+
 
       if (serverMessage === "User already exists") {
         setTimeout(() => {
           navigate("/verify-email", { state: { email: formData.email } });
-        }, 500);
+        }, 5000);
       }
     } finally {
       setIsSubmitting(false);
@@ -123,6 +125,9 @@ const SeekerSignup = () => {
   };
 
   return (
+    <div>
+       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+   
     <Box
       component="form"
       onSubmit={handleSubmit}
@@ -285,6 +290,7 @@ const SeekerSignup = () => {
         {isSubmitting ? "Registering..." : "Register as Job Seeker"}
       </Button>
     </Box>
+     </div>
   );
 };
 

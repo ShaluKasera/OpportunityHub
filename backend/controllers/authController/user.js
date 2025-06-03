@@ -93,7 +93,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-const verifyOtp = async (req, res) => {
+const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
   try {
     if (!email || !otp) {
@@ -162,6 +162,16 @@ const forgotPassword = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+const verifyOtp = (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!isValidOtp(email, otp)) {
+    return res.status(400).json({ message: "Invalid or expired OTP" });
+  }
+
+  res.status(200).json({ message: "OTP verified successfully" });
 };
 
 const resetPassword = async (req, res) => {
@@ -236,7 +246,7 @@ const getAllJobs = async (req, res) => {
   }
 };
 
-const getJodById = async ( req,res) => {
+const getJodById = async (req, res) => {
   const { id } = req.params;
   try {
     const job = await Job.findByPk(id);
@@ -247,15 +257,15 @@ const getJodById = async ( req,res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: "Server error" });
   }
-}
-
+};
 
 module.exports = {
   loginUser,
-  verifyOtp,
+  verifyEmail,
   resendOtp,
   forgotPassword,
   resetPassword,
   getAllJobs,
-  getJodById
+  getJodById,
+  verifyOtp,
 };

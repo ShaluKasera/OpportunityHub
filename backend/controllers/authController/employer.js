@@ -354,7 +354,6 @@ const deleteJob = async (req, res) => {
 };
 
 
-
 const getAllJobs = async (req, res) => {
   const userId = req.user.id;
 
@@ -391,6 +390,37 @@ const getAllJobs = async (req, res) => {
   } catch (error) {
     console.error("Error fetching jobs:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+const getPostedJobById = async (req, res) => {
+  const userId = req.user.id;
+  const { jobId } = req.params;
+
+  try {
+   
+    const employer = await Employer.findOne({ where: { userId } });
+    if (!employer) {
+      return res.status(404).json({ message: "Employer profile not found" });
+    }
+
+   
+    const job = await Job.findOne({
+      where: {
+        id: jobId,
+        employerId: employer.id,
+      },
+    });
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found or unauthorized" });
+    }
+
+    res.status(200).json({ success: true, job });
+  } catch (error) {
+    console.error("Error fetching job by ID:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -572,6 +602,8 @@ const getAllJobSeekersOffered = async (req, res) => {
   }
 };
 
+
+
 const getAllAcceptedJobSeekers = async (req, res) => {
   const userId = req.user.id;
 
@@ -699,7 +731,18 @@ const getAcceptedJobSeekerDetails = async (req, res) => {
 const getApplicationsByJobId = async (req, res) => {
   const { jobId } = req.body;
 
-  const employerId = req.user.id;
+  const userId = req.user.id;
+    const employer = await Employer.findOne({
+      where: { userId: userId },
+    });
+
+    if (!employer) {
+      return res.status(404).json({
+        success: false,
+        message: "Employer profile not found",
+      });
+    }
+ const employerId = employer.id;
 
   try {
     const job = await Job.findOne({ where: { id: jobId } });
@@ -775,6 +818,35 @@ const updateApplicationStatus = async (req, res) => {
   }
 };
 
+const getAllApplications = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
 module.exports = {
   // employerSignin,
   EmployerSignup,
@@ -784,10 +856,12 @@ module.exports = {
   updateJob,
   deleteJob,
   getAllJobs,
+  getPostedJobById,
   sendJobOffersToRelevantSeekers,
   getAllJobSeekersOffered,
   getAllAcceptedJobSeekers,
   getAcceptedJobSeekerDetails,
   getApplicationsByJobId,
   updateApplicationStatus,
+  getAllApplications,
 };

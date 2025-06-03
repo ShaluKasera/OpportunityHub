@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Layout from "../../components/Layout/Layout";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 const EmailVerification = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
@@ -106,7 +107,7 @@ const EmailVerification = () => {
         }
       );
 
-      alert(response.data.message);
+      toast.info(response.data.message);
 
       if (
         response.data.message === "Email verified successfully" ||
@@ -119,7 +120,7 @@ const EmailVerification = () => {
         "OTP Verification Error:",
         error.response?.data || error.message
       );
-      alert(error.response?.data?.message || "OTP verification failed");
+      toast.error(error.response?.data?.message || "OTP verification failed");
     } finally {
       setIsVerifying(false);
     }
@@ -139,11 +140,11 @@ const EmailVerification = () => {
         }
       );
 
-      alert(response.data.message);
+      toast.success(response.data.message);
       setOtpExpiresIn(600); // reset OTP expiry timer to 10 minutes
     } catch (error) {
       console.error("Resend OTP Error:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Failed to resend OTP");
+      toast.error(error.response?.data?.message || "Failed to resend OTP");
     }
   };
 
@@ -158,6 +159,7 @@ const EmailVerification = () => {
 
   return (
     <Layout>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="max-w-md mx-auto mt-12 bg-white p-6 rounded shadow">
         <form onSubmit={verifyOtp}>
           <h2 className="text-xl font-semibold mb-4 text-center">Enter OTP</h2>

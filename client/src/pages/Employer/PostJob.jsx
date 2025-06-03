@@ -14,7 +14,8 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { Button } from "react-bootstrap";
 import Layout from "../../components/Layout/Layout";
-
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 const PostJob = () => {
   const [formData, setFormData] = useState({
     title: "",
@@ -82,11 +83,11 @@ const PostJob = () => {
 
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
-      alert(response.data.message);
+      toast.success(response.data.message);
     } catch (error) {
       const serverMessage = error.response?.data?.message;
       console.error("Post job error:", error.response?.data || error.message);
-      alert(serverMessage || "There was an error posting the job");
+      toast.error(serverMessage || "There was an error posting the job");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,6 +95,7 @@ const PostJob = () => {
 
   return (
     <Layout>
+       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <Box
         display="flex"
         flexDirection="column"

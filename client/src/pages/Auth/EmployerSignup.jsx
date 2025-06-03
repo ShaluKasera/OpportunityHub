@@ -9,6 +9,8 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const EmployerSignup = () => {
   const navigate = useNavigate();
@@ -101,14 +103,16 @@ const EmployerSignup = () => {
       });
       setLogoPreview(null);
 
-      alert(response.data.message);
+      toast.success(response.data.message || "Registered successfully!");
+
       setTimeout(() => {
         navigate("/verify-email", { state: { email } });
       }, 2000);
     } catch (error) {
       const serverMessage = error.response?.data?.message;
       console.error("Signup error:", error.response?.data || error.message);
-      alert(serverMessage || "Signup failed");
+     toast.success(serverMessage|| "Registeration Failed!");
+
 
       if (serverMessage === "User already exists") {
         setTimeout(() => {
@@ -122,6 +126,7 @@ const EmployerSignup = () => {
 
   return (
     <div className="container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <Form onSubmit={handleSubmit} className="space-y-4">
         <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
           Employer Registration

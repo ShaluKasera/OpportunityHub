@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import Layout from "../../components/Layout/Layout";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
-
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 const ForgetPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -50,35 +51,48 @@ const ForgetPassword = () => {
         email,
         name: email.split("@")[0], 
       });
-      alert(response.data.message);
+      toast.success(response.data.message);
       setStep(2);
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to send OTP");
+      toast.error(error.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyOtp = async () => {
-    const enteredOtp = otp.join("");
-    if (enteredOtp.length !== 6) {
-      alert("Please enter a valid 6-digit OTP");
-      return;
-    }
+const verifyOtp = async () => {
+  const enteredOtp = otp.join("");
+  if (enteredOtp.length !== 6) {
+    toast.error("Please enter a valid 6-digit OTP");
+    return;
+  }
 
+  try {
+    setLoading(true);
+    const response = await axios.post("http://localhost:8000/api/user/verify-otp", {
+      email,
+      otp: enteredOtp,
+    });
+    toast.success(response.data.message);
     setStep(3);
-  };
+  } catch (error) {
+    toast.error(error.response?.data?.message || "OTP verification failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handlePasswordSubmit = async () => {
     const enteredOtp = otp.join("");
 
     if (passwords.newPass !== passwords.confirmPass) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (passwords.newPass.length < 6) {
-      alert("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -90,10 +104,10 @@ const ForgetPassword = () => {
         newPassword: passwords.newPass,
       });
 
-      alert(response.data.message);
+      toast.success(response.data.message);
       setStep(4);
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to reset password");
+      toast.error(error.response?.data?.message || "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -101,6 +115,7 @@ const ForgetPassword = () => {
 
   return (
     <Layout>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="mx-auto w-[80%] md:w-[60%] lg:w-[30%] mt-20 border p-8 rounded shadow-lg bg-white">
         {step === 1 && (
           <>

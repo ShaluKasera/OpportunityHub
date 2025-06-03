@@ -9,6 +9,9 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -40,15 +43,17 @@ const Header = () => {
       setUser(loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       setShowLogin(false);
+      toast.success("Login successful!");
     } catch (err) {
       const message =
         err.response?.data?.message || "Login failed. Please try again.";
       setError(message);
+      toast.error(message);
     }
   };
 
   const logout = () => {
-    alert("Logged out");
+     toast.success("Logged out successfully.");
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -101,6 +106,9 @@ const Header = () => {
   );
 
   return (
+    <div>
+       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+   
     <header className="bg-gray-100 text-white py-7 px-24 flex justify-between items-center">
       <div className="text-4xl Zen_Dots font-bold text-black">
         Job<span className="text-red-700">Hunt</span>
@@ -190,12 +198,6 @@ const Header = () => {
               Login
             </Button>
 
-            {error && (
-              <div className="alert alert-danger text-sm py-2 px-3">
-                {error}
-              </div>
-            )}
-
             <div className="flex items-center justify-center space-x-2 my-3">
               <span className="h-px w-full bg-gray-300"></span>
               <span className="text-sm text-gray-500">OR</span>
@@ -214,6 +216,7 @@ const Header = () => {
         </Modal.Body>
       </Modal>
     </header>
+     </div>
   );
 };
 
