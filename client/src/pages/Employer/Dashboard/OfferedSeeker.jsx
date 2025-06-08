@@ -35,7 +35,7 @@ const OfferedSeeker = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/employer/list-offered-seeker",
+          `${import.meta.env.VITE_BASE_URL}/employer/list-offered-seeker`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -10,8 +10,8 @@ const Hero1 = () => {
     try {
       const response = await fetch(
         title
-          ? `http://localhost:8000/api/user/all-jobs?title=${title}`
-          : `http://localhost:8000/api/user/all-jobs?limit=4`
+          ? `${import.meta.env.VITE_BASE_URL}/user/all-jobs?title=${title}`
+          : `${import.meta.env.VITE_BASE_URL}/user/all-jobs?limit=4`
       );
       const data = await response.json();
       if (data.success) {

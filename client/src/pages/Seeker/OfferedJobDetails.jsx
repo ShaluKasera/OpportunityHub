@@ -25,7 +25,7 @@ const OfferedJobDetails = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:8000/api/seeker/job-offers/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/seeker/job-offers/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ const OfferedJobDetails = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:8000/api/seeker/job-offers/${id}`,
+        `${import.meta.env.VITE_BASE_URL}/seeker/job-offers/${id}`,
         { status: action },
         {
           headers: {

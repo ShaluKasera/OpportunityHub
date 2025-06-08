@@ -38,7 +38,7 @@ const EmployerProfile = () => {
       const fetchProfile = async () => {
         try {
           const res = await axios.get(
-            "http://localhost:8000/api/employer/profile",
+            `${import.meta.env.VITE_BASE_URL}/employer/profile`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -87,7 +87,7 @@ const EmployerProfile = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:8000/api/employer/profile",
+        `${import.meta.env.VITE_BASE_URL}/employer/profile`,
         profileData,
         {
           headers: {

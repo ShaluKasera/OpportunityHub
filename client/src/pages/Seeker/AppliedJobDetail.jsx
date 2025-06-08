@@ -21,7 +21,7 @@ const AppliedJobDetail = () => {
     const fetchJobDetails = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:8000/api/seeker/applied-jobs/${jobId}`, {
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/seeker/applied-jobs/${jobId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

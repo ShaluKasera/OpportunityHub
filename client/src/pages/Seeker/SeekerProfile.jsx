@@ -36,7 +36,7 @@ const SeekerProfile = () => {
       const fetchProfile = async () => {
         try {
           const res = await axios.get(
-            "http://localhost:8000/api/seeker/profile",
+            `${import.meta.env.VITE_BASE_URL}/seeker/profile`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -76,7 +76,7 @@ const SeekerProfile = () => {
 
     try {
       const res = await axios.put(
-        "http://localhost:8000/api/seeker/profile",
+        `${import.meta.env.VITE_BASE_URL}/seeker/profile`,
         profileData,
         {
           headers: {
@@ -139,7 +139,7 @@ const SeekerProfile = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/seeker/all-applied-job",
+          `${import.meta.env.VITE_BASE_URL}/seeker/all-applied-job`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -167,7 +167,7 @@ const SeekerProfile = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/seeker/job-offers",
+          `${import.meta.env.VITE_BASE_URL}/seeker/job-offers`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

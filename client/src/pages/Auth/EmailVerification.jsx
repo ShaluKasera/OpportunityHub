@@ -99,7 +99,7 @@ const EmailVerification = () => {
       const enteredOtp = otp.join("");
 
       const response = await axios.post(
-        "http://localhost:8000/api/user/verify-email",
+        `${import.meta.env.VITE_BASE_URL}/user/verify-email`,
         { email, otp: enteredOtp },
         {
           headers: { "Content-Type": "application/json" },
@@ -132,7 +132,7 @@ const EmailVerification = () => {
     try {
       setResendTimer(30); // start 30 sec cooldown
       const response = await axios.post(
-        "http://localhost:8000/api/user/resend-otp",
+        `${import.meta.env.VITE_BASE_URL}/user/resend-otp`,
         { email },
         {
           headers: { "Content-Type": "application/json" },

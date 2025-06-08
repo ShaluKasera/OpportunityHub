@@ -25,7 +25,7 @@ const JobPage = () => {
     setError(null);
 
     try {
-      const response = await axios.get("http://localhost:8000/api/user/all-jobs", {
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/all-jobs`, {
         params: {
           ...filters,
           page,

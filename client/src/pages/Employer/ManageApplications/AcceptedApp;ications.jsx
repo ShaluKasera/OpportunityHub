@@ -21,7 +21,7 @@ const AcceptedApplications = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/employer/accepted-applications",
+          `${import.meta.env.VITE_BASE_URL}/employer/accepted-applications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

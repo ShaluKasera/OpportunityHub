@@ -21,7 +21,7 @@ const ReviewApplications = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/employer/review-applications",
+          `${import.meta.env.VITE_BASE_URL}/employer/review-applications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaLinkedin } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
+
 import {
   Navbar,
   Nav,
@@ -22,12 +24,14 @@ const Header = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
+
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     try {
-      const res = await axios.post("http://localhost:8000/api/user/login", {
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/login`, {
         email,
         password,
       });
@@ -59,6 +63,7 @@ const Header = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     delete axios.defaults.headers.common["Authorization"];
+     navigate("/");
   };
 
   useEffect(() => {

@@ -79,7 +79,7 @@ const EmployerSignup = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/api/employer/signup",
+        `${import.meta.env.VITE_BASE_URL}/employer/signup`,
         dataToSend,
         {
           headers: {

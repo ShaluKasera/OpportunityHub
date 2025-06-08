@@ -56,7 +56,7 @@ const PostJob = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/api/employer/post-job",
+        `${import.meta.env.VITE_BASE_URL}/employer/post-job`,
         dataToSend,
         {
           headers: {

@@ -23,7 +23,7 @@ const PostedJobDetail = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:8000/api/employer/posted-joblist/${jobId}`,
+        `${import.meta.env.VITE_BASE_URL}/employer/posted-joblist/${jobId}`,
         { withCredentials: true }
       );
       setJob(res.data.job);
@@ -59,7 +59,7 @@ const PostedJobDetail = () => {
 
     try {
       await axios.put(
-        `http://localhost:8000/api/employer/update-job/${jobId}`,
+        `${import.meta.env.VITE_BASE_URL}/employer/update-job/${jobId}`,
         formData,
         { withCredentials: true }
       );
@@ -80,7 +80,7 @@ const PostedJobDetail = () => {
   const handleSendOffers = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/employer/send-jobOffer",
+        `${import.meta.env.VITE_BASE_URL}/employer/send-jobOffer`,
         { jobId: Number(jobId) },
         { withCredentials: true }
       );

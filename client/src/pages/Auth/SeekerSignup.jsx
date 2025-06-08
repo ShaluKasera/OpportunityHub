@@ -80,7 +80,7 @@ const SeekerSignup = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/api/seeker/signup",
+        `${import.meta.env.VITE_BASE_URL}/seeker/signup`,
         dataToSend,
         {
           headers: {

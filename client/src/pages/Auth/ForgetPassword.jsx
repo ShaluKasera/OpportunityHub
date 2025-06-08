@@ -47,7 +47,7 @@ const ForgetPassword = () => {
   const sendOtp = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:8000/api/user/forgot-password", {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/forgot-password`, {
         email,
         name: email.split("@")[0], 
       });
@@ -69,7 +69,7 @@ const verifyOtp = async () => {
 
   try {
     setLoading(true);
-    const response = await axios.post("http://localhost:8000/api/user/verify-otp", {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/verify-otp`, {
       email,
       otp: enteredOtp,
     });
@@ -98,7 +98,7 @@ const verifyOtp = async () => {
 
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:8000/api/user/reset-password", {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/reset-password`, {
         email,
         otp: enteredOtp,
         newPassword: passwords.newPass,

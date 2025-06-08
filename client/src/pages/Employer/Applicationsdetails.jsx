@@ -38,7 +38,7 @@ const ApplicationsDetail = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://localhost:8000/api/employer/update-application-status/${applicationId}`,
+        `${import.meta.env.VITE_BASE_URL}/employer/update-application-status/${applicationId}`,
         { status },
         {
           withCredentials: true,

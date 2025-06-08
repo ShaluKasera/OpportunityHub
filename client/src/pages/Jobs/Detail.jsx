@@ -34,7 +34,7 @@ const Detail = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/user/job/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/job/${id}`);
         if (res.data.success) {
           setJob(res.data.job);
         } else {
@@ -55,7 +55,7 @@ const Detail = () => {
     try {
       setApplying(true);
       const res = await axios.post(
-        "http://localhost:8000/api/seeker/apply-job",
+        `${import.meta.env.VITE_BASE_URL}/seeker/apply-job`,
         {
           jobId: id,
           coverLetter:

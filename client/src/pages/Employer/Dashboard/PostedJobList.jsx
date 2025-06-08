@@ -11,7 +11,7 @@ const PostedJobList = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://localhost:8000/api/employer/posted-joblist",
+          `${import.meta.env.VITE_BASE_URL}/employer/posted-joblist`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
