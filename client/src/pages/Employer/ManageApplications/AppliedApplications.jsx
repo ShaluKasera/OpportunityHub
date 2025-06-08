@@ -44,77 +44,87 @@ const AppliedApplications = () => {
       </p>
       <div className="h-[1px] mt-4 mb-4 bg-red-700" />
 
-      <Box
-        sx={{
-          overflowX: "auto",
-          display: "flex",
-          gap: 2,
-          paddingBottom: 2,
-        }}
-      >
-        {applications.map((app, index) => (
-          <Card
-            key={index}
-            sx={{
-              minWidth: 300,
-              flex: "0 0 auto",
-            }}
-            elevation={3}
-          >
-            <CardContent>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Avatar
-                  src="https://randomuser.me/api/portraits/lego/3.jpg"
-                  alt="Seeker"
-                  sx={{ width: 48, height: 48 }}
-                />
-                <Typography variant="body2" color="text.secondary">
-                  {app.createdAt
-                    ? format(new Date(app.createdAt), "dd MMM yyyy")
-                    : "N/A"}
+      {applications.length === 0 ? (
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          className="text-center mt-8"
+        >
+          No applied applications found.
+        </Typography>
+      ) : (
+        <Box
+          sx={{
+            overflowX: "auto",
+            display: "flex",
+            gap: 2,
+            paddingBottom: 2,
+          }}
+        >
+          {applications.map((app, index) => (
+            <Card
+              key={index}
+              sx={{
+                minWidth: 300,
+                flex: "0 0 auto",
+              }}
+              elevation={3}
+            >
+              <CardContent>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Avatar
+                    src="https://randomuser.me/api/portraits/lego/3.jpg"
+                    alt="Seeker"
+                    sx={{ width: 48, height: 48 }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {app.createdAt
+                      ? format(new Date(app.createdAt), "dd MMM yyyy")
+                      : "N/A"}
+                  </Typography>
+                </Box>
+
+                <Typography variant="h6" mt={2} fontWeight="bold" color="error">
+                  {app.job?.title || "No Title"}
                 </Typography>
-              </Box>
 
-              <Typography variant="h6" mt={2} fontWeight="bold" color="error">
-                {app.job?.title || "No Title"}
-              </Typography>
+                <Typography variant="subtitle1" mt={1}>
+                  {app.jobSeeker?.user?.name || "No Name"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {app.jobSeeker?.user?.email || "No Email"}
+                </Typography>
 
-              <Typography variant="subtitle1" mt={1}>
-                {app.jobSeeker?.user?.name || "No Name"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {app.jobSeeker?.user?.email || "No Email"}
-              </Typography>
+                <Typography variant="body2" mt={1}>
+                  <strong>Domain:</strong> {app.jobSeeker?.domain || "N/A"}
+                </Typography>
 
-              <Typography variant="body2" mt={1}>
-                <strong>Domain:</strong> {app.jobSeeker?.domain || "N/A"}
-              </Typography>
+                <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
+                  {app.jobSeeker?.skills?.map((skill, i) => (
+                    <Chip label={skill} key={i} variant="outlined" />
+                  ))}
+                </Box>
 
-              <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
-                {app.jobSeeker?.skills?.map((skill, i) => (
-                  <Chip label={skill} key={i} variant="outlined" />
-                ))}
-              </Box>
-
-              <Button
-                variant="outline-danger"
-                className="w-full mt-2"
-                onClick={() =>
-                  navigate(`/application-detail/${app.id}`, {
-                    state: app,
-                  })
-                }
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
+                <Button
+                  variant="outline-danger"
+                  className="w-full mt-2"
+                  onClick={() =>
+                    navigate(`/application-detail/${app.id}`, {
+                      state: app,
+                    })
+                  }
+                >
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 };

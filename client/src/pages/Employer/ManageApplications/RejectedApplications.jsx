@@ -44,6 +44,16 @@ const RejectedApplications = () => {
       </p>
       <div className="h-[1px] mt-4 mb-4 bg-red-700" />
 
+      {applications.length === 0 ? (
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                className="text-center mt-8"
+              >
+                No Rejected applications found.
+              </Typography>
+            ) : (
+
       <Box
         sx={{
           overflowX: "auto",
@@ -114,7 +124,7 @@ const RejectedApplications = () => {
             </CardContent>
           </Card>
         ))}
-      </Box>
+      </Box>)}
     </Box>
   );
 };

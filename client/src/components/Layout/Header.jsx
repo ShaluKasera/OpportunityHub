@@ -111,7 +111,7 @@ const Header = () => {
         expanded={expanded}
       >
         <Container fluid>
-          <Navbar.Brand as={Link} to="/" className="!text-3xl fw-bold">
+          <Navbar.Brand as={Link} className="!text-3xl fw-bold">
             Job<span className="text-danger">Hunt</span>
           </Navbar.Brand>
           <Navbar.Toggle

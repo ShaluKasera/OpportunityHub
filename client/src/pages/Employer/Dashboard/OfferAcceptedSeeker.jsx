@@ -57,7 +57,15 @@ const OfferAcceptedSeeker = () => {
         All Seekers Who Accept the offer
       </p>
       <div className="h-[1px] mt-4 mb-4 bg-red-700" />
-
+{offers.length === 0 ? (
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          className="text-center mt-8"
+        >
+          No Accepted Seeker found.
+        </Typography>
+      ) : (
       <Box
         sx={{
           overflowX: "auto",
@@ -124,7 +132,7 @@ const OfferAcceptedSeeker = () => {
             </CardContent>
           </Card>
         ))}
-      </Box>
+      </Box>)}
 
       {/* Modal for detailed view */}
       <Modal open={Boolean(selected)} onClose={() => setSelected(null)}>
