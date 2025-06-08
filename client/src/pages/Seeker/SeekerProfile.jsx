@@ -5,13 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import JobTabsSection from "./JobTabsSection";
 
 const SeekerProfile = () => {
-  // seeker profile
-  const [user, setUser] = useState({
-    profilePic: "",
-    name: "",
-    email: "",
-  });
-
+  const [user, setUser] = useState({ profilePic: "", name: "", email: "" });
   const [jobSeeker, setJobSeeker] = useState({
     domain: "",
     location: "",
@@ -25,14 +19,16 @@ const SeekerProfile = () => {
   const [decoded, setDecoded] = useState(null);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isProfessionalEditOpen, setIsProfessionalEditOpen] = useState(false);
-  
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [jobOffers, setJobOffers] = useState([]);
+  const [appliedJobsLoading, setAppliedJobsLoading] = useState(true);
+  const [jobOffersLoading, setJobOffersLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decodedToken = jwtDecode(token);
-        setDecoded(decodedToken);
+        setDecoded(jwtDecode(token));
       } catch (err) {
         console.error("Invalid token:", err);
       }
@@ -42,12 +38,9 @@ const SeekerProfile = () => {
           const res = await axios.get(
             "http://localhost:8000/api/seeker/profile",
             {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
-
           const data = res.data;
           const userData = data.user || {};
 
@@ -79,10 +72,7 @@ const SeekerProfile = () => {
 
   const updateProfile = async (profileData) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("No token found");
-      return;
-    }
+    if (!token) return console.error("No token found");
 
     try {
       const res = await axios.put(
@@ -95,10 +85,7 @@ const SeekerProfile = () => {
           },
         }
       );
-
-      if (res.status === 200) {
-        alert("Profile updated successfully!");
-      }
+      if (res.status === 200) alert("Profile updated successfully!");
     } catch (error) {
       console.error(
         "Failed to update profile:",
@@ -109,24 +96,17 @@ const SeekerProfile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setUser((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setUser((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProfessionalChange = (e) => {
     const { name, value } = e.target;
-    setJobSeeker((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setJobSeeker((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-
-    const profileData = {
+    updateProfile({
       name: user.name,
       phone: jobSeeker.phone,
       domain: jobSeeker.domain,
@@ -135,16 +115,13 @@ const SeekerProfile = () => {
       location: jobSeeker.location,
       resumeUrl: jobSeeker.resumeUrl,
       availabilityStatus: jobSeeker.availabilityStatus,
-    };
-
-    updateProfile(profileData);
+    });
     setIsProfileEditOpen(false);
   };
 
   const handleSaveProfessionalDetail = (e) => {
     e.preventDefault();
-
-    const profileData = {
+    updateProfile({
       name: user.name,
       phone: jobSeeker.phone,
       domain: jobSeeker.domain,
@@ -153,17 +130,9 @@ const SeekerProfile = () => {
       location: jobSeeker.location,
       resumeUrl: jobSeeker.resumeUrl,
       availabilityStatus: jobSeeker.availabilityStatus,
-    };
-
-    updateProfile(profileData);
+    });
     setIsProfessionalEditOpen(false);
   };
-
-  // Jobsections
-  const [appliedJobs, setAppliedJobs] = useState([]);
-  const [jobOffers, setJobOffers] = useState([]);
-  const [appliedJobsLoading, setAppliedJobsLoading] = useState(true);
-  const [jobOffersLoading, setJobOffersLoading] = useState(true);
 
   useEffect(() => {
     const fetchAppliedJobs = async () => {
@@ -172,9 +141,7 @@ const SeekerProfile = () => {
         const res = await axios.get(
           "http://localhost:8000/api/seeker/all-applied-job",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -184,7 +151,6 @@ const SeekerProfile = () => {
             title: app.job.title,
             company: app.job.domain || "Unknown Company",
           }));
-
           setAppliedJobs(formattedJobs);
         }
       } catch (error) {
@@ -193,146 +159,133 @@ const SeekerProfile = () => {
         setAppliedJobsLoading(false);
       }
     };
-
     fetchAppliedJobs();
   }, []);
 
   useEffect(() => {
-  const fetchOfferedJobs = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:8000/api/seeker/job-offers",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+    const fetchOfferedJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          "http://localhost:8000/api/seeker/job-offers",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.data.success) {
+          const formattedJobs = res.data.jobOffers.map((app) => ({
+            jobId: app.job.id,
+            jobOfferId: app.id,
+            title: app.job.title,
+            company: app.job.domain || "Unknown Company",
+          }));
+          setJobOffers(formattedJobs);
         }
-      );
-
-      if (res.data.success) {
-        const formattedJobs = res.data.jobOffers.map((app) => ({
-          jobId: app.job.id,              
-          jobOfferId: app.id,              
-          title: app.job.title,
-          company: app.job.domain || "Unknown Company",
-        }));
-
-        setJobOffers(formattedJobs);
-        console.log(formattedJobs);
+      } catch (error) {
+        console.error("Error fetching offered jobs:", error);
+      } finally {
+        setJobOffersLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching offered jobs:", error);
-    } finally {
-      setJobOffersLoading(false);
-    }
-  };
+    };
+    fetchOfferedJobs();
+  }, []);
 
-  fetchOfferedJobs();
-}, []);
-
-
-  const handleViewDetails = (job) => {
-    console.log("Job details clicked:", job);
-  };
-
+  const handleViewDetails = (job) => console.log("Job details clicked:", job);
 
   return (
-    <>
-      <div className="container py-6 max-w-4xl mx-auto space-y-10">
-        {/* Profile Section */}
-        <section className="relative bg-white p-6 rounded-xl border shadow">
-          <p className="text-3xl font-bold mb-4">Profile</p>
-          <button
-            className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
-            onClick={() => setIsProfileEditOpen(true)}
-          >
-            Edit
-          </button>
-          <div className="flex items-center space-x-10 px-6">
-            <img
-              src={user.profilePic}
-              alt={`${user.name} profile`}
-              className="w-24 h-24 rounded-full object-cover border-2 border-red-700"
-            />
-            <div>
-              <h2 className="text-2xl font-extrabold">{user.name}</h2>
-              <p className="text-gray-600">{user.email}</p>
-              <p className="text-gray-600">{jobSeeker.location}</p>
-            </div>
+    <div className="container px-4 py-6 max-w-4xl mx-auto space-y-10">
+      {/* Profile Section */}
+      <section className="relative bg-white p-6 rounded-xl border shadow">
+        <p className="text-2xl sm:text-3xl font-bold mb-4">Profile</p>
+        <button
+          className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
+          onClick={() => setIsProfileEditOpen(true)}
+        >
+          Edit
+        </button>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-y-4 sm:gap-x-10 px-2">
+          <img
+            src={user.profilePic}
+            alt={user.name}
+            className="w-24 h-24 rounded-full object-cover border-2 border-red-700"
+          />
+          <div className="text-center sm:!text-left">
+            <h2 className="text-xl font-extrabold">{user.name}</h2>
+            <p className="text-gray-600">{user.email}</p>
+            <p className="text-gray-600">{jobSeeker.location}</p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Professional Details Section */}
-        <section className="relative bg-white p-6 rounded-xl border shadow space-y-2">
-          <p className="text-3xl font-bold mb-4">Professional Details</p>
-          <button
-            className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
-            onClick={() => setIsProfessionalEditOpen(true)}
-          >
-            Edit
-          </button>
-          <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm">
-            <div>
-              <span className="font-semibold">Domain:</span>{" "}
-              {jobSeeker.domain || "N/A"}
-            </div>
-            <div>
-              <span className="font-semibold">Location:</span>{" "}
-              {jobSeeker.location || "N/A"}
-            </div>
-            <div>
-              <span className="font-semibold">Experience:</span>{" "}
-              {jobSeeker.experienceYears ?? "N/A"} years
-            </div>
-            <div>
-              <span className="font-semibold">Phone:</span>{" "}
-              {jobSeeker.phone || "N/A"}
-            </div>
-            <div className="col-span-2">
-              <span className="font-semibold">Skills:</span>{" "}
-              {jobSeeker.skills?.join(", ") || "N/A"}
-            </div>
-            <div className="col-span-2">
-              <span className="font-semibold">Resume:</span>{" "}
+      {/* Professional Details Section */}
+      <section className="relative bg-white p-4 sm:p-6 rounded-xl border shadow space-y-4 text-sm sm:text-base">
+        <p className="text-xl sm:text-2xl font-bold">Professional Details</p>
+        <button
+          className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300 text-sm sm:text-base"
+          onClick={() => setIsProfessionalEditOpen(true)}
+        >
+          Edit
+        </button>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-gray-700">
+          <div>
+            <b>Domain:</b> {jobSeeker.domain || "N/A"}
+          </div>
+          <div>
+            <b>Location:</b> {jobSeeker.location || "N/A"}
+          </div>
+          <div>
+            <b>Experience:</b> {jobSeeker.experienceYears ?? "N/A"} years
+          </div>
+          <div>
+            <b>Phone:</b> {jobSeeker.phone || "N/A"}
+          </div>
+          <div className="sm:col-span-2">
+            <b>Skills:</b> {jobSeeker.skills?.join(", ") || "N/A"}
+          </div>
+          <div className="sm:col-span-2 break-words">
+            <b>Resume:</b>{" "}
+            {jobSeeker.resumeUrl ? (
               <a
                 href={jobSeeker.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-red-700"
+                className="text-red-700 underline"
               >
                 View Resume
               </a>
-            </div>
-            <div className="col-span-2">
-              <span className="font-semibold">Availability Status:</span>{" "}
-              <span
-                className={`font-semibold ${
-                  jobSeeker.availabilityStatus === "available"
-                    ? "text-green-600"
-                    : jobSeeker.availabilityStatus === "employed"
-                    ? "text-yellow-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {jobSeeker.availabilityStatus
-                  ?.replace("_", " ")
-                  .toUpperCase() || "N/A"}
-              </span>
-            </div>
+            ) : (
+              "N/A"
+            )}
           </div>
-        </section>
-
-        {/* Tabs */}
-        <div className="max-w-full border rounded-xl mx-auto mt-8">
-          <JobTabsSection
-            appliedJobs={appliedJobs}
-            jobOffers={jobOffers}
-            handleViewDetails={handleViewDetails}
-            appliedJobsLoading={appliedJobsLoading}
-            jobOffersLoading={jobOffersLoading}
-          />
+          <div className="sm:col-span-2">
+            <b>Availability Status:</b>{" "}
+            <span
+              className={`font-semibold ${
+                jobSeeker.availabilityStatus === "available"
+                  ? "text-green-600"
+                  : jobSeeker.availabilityStatus === "employed"
+                  ? "text-yellow-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {jobSeeker.availabilityStatus?.replace("_", " ")?.toUpperCase() ||
+                "N/A"}
+            </span>
+          </div>
         </div>
+      </section>
+
+      {/* Tabs Section */}
+      <div className="border rounded-xl mt-8">
+        <JobTabsSection
+          appliedJobs={appliedJobs}
+          jobOffers={jobOffers}
+          handleViewDetails={handleViewDetails}
+          appliedJobsLoading={appliedJobsLoading}
+          jobOffersLoading={jobOffersLoading}
+        />
       </div>
 
       {/* Profile Edit Modal */}
@@ -345,23 +298,21 @@ const SeekerProfile = () => {
             >
               ×
             </button>
-            <p className="text-2xl font-bold mb-4">Edit Profile</p>
+            <p className="text-xl font-bold mb-4">Edit Profile</p>
             <input
               type="text"
               name="name"
               value={user.name}
               onChange={handleProfileChange}
               placeholder="Name"
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded mt-2"
             />
             <input
               type="email"
               name="email"
               value={user.email}
-              onChange={handleProfileChange}
-              placeholder="Email"
-              className="w-full border p-2 rounded"
               disabled
+              className="w-full border mt-2 p-2 rounded"
             />
             <input
               type="text"
@@ -369,7 +320,7 @@ const SeekerProfile = () => {
               value={jobSeeker.location}
               onChange={handleProfessionalChange}
               placeholder="Location"
-              className="w-full border p-2 rounded"
+              className="w-full mt-2 border p-2 rounded"
             />
             <Button
               variant="outline-danger"
@@ -392,14 +343,14 @@ const SeekerProfile = () => {
             >
               ×
             </button>
-            <p className="text-2xl font-bold mb-4">Edit Professional Details</p>
+            <p className="text-xl font-bold mb-4">Edit Professional Details</p>
             <input
               type="text"
               name="phone"
               value={jobSeeker.phone}
               onChange={handleProfessionalChange}
               placeholder="Phone"
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 mt-2 rounded"
             />
             <input
               type="text"
@@ -407,7 +358,7 @@ const SeekerProfile = () => {
               value={jobSeeker.domain}
               onChange={handleProfessionalChange}
               placeholder="Domain"
-              className="w-full border p-2 rounded"
+              className="w-full mt-2 border p-2 rounded"
             />
             <input
               type="text"
@@ -415,7 +366,7 @@ const SeekerProfile = () => {
               value={jobSeeker.experienceYears}
               onChange={handleProfessionalChange}
               placeholder="Experience (Years)"
-              className="w-full border p-2 rounded"
+              className="w-full mt-2 border p-2 rounded"
             />
             <input
               type="text"
@@ -428,7 +379,7 @@ const SeekerProfile = () => {
                 }))
               }
               placeholder="Skills (comma-separated)"
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 mt-2 rounded"
             />
             <input
               type="text"
@@ -436,13 +387,13 @@ const SeekerProfile = () => {
               value={jobSeeker.resumeUrl}
               onChange={handleProfessionalChange}
               placeholder="Resume URL"
-              className="w-full border p-2 rounded"
+              className="w-full mt-2 border p-2 rounded"
             />
             <select
               name="availabilityStatus"
               value={jobSeeker.availabilityStatus}
               onChange={handleProfessionalChange}
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 mt-2 rounded"
             >
               <option value="">Select Availability</option>
               <option value="available">Available</option>
@@ -459,7 +410,7 @@ const SeekerProfile = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

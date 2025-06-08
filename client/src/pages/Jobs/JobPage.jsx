@@ -95,7 +95,7 @@ const JobPage = () => {
 
         {/* Main Content */}
         <div
-          className="flex-1 p-6 transition-all duration-300 w-full"
+          className="flex-1  transition-all duration-300 w-full"
           style={{
             paddingLeft: showSidebar ? 288 : 0,
             paddingTop: NAVBAR_HEIGHT,

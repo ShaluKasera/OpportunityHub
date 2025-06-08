@@ -60,49 +60,64 @@ const AppliedJobDetail = () => {
 
   return (
     <Layout>
-      <div className="container py-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="container max-w-4xl mx-auto py-8 px-4 sm:px-6">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <p className="Ysabeau_Infant text-4xl font-extrabold">{job.title}</p>
-            <div className="flex space-x-4 text-xs font-semibold mt-1">
-              <span className="text-md text-red-700">Location: {job.location}</span>
-              <span className="text-md text-gray-500">{job.jobType}</span>
-              <span className="text-md text-green-700">{job.salary}</span>
+            <p className="Ysabeau_Infant text-2xl sm:text-4xl font-extrabold">{job.title}</p>
+            <div className="flex flex-wrap gap-2 text-sm font-semibold mt-2">
+              <span className="text-red-700">Location: {job.location}</span>
+              <span className="text-gray-600">{job.jobType}</span>
+              <span className="text-green-700">{job.salary}</span>
             </div>
           </div>
           <div className="text-sm font-medium">
-            <span className="px-4 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-300">
+            <span className="px-4 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-300 inline-block">
               Status: {status}
             </span>
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">Applied on: <strong>{formatDate(createdAt)}</strong></p>
-
-        {job.deadline && (
-          <p className="text-sm text-gray-500 mb-4">Deadline: <strong>{formatDate(job.deadline)}</strong></p>
-        )}
-
-        <p className="font-semibold mb-1">Job Description</p>
-        <hr className="mb-2" />
-        <p className="text-sm text-gray-700 mb-4">{job.description}</p>
-
-        <p className="font-semibold">Domain</p>
-        <hr className="mb-2" />
-        <p className="text-sm text-gray-700 mb-4">{job.domain}</p>
-
-        <p className="font-semibold">Experience Required</p>
-        <hr className="mb-2" />
-        <p className="text-sm text-gray-700 mb-4">
-          {job.experienceRequired || "Not specified"}
+        {/* Applied Date */}
+        <p className="text-sm text-gray-500 mb-2">
+          Applied on: <strong>{formatDate(createdAt)}</strong>
         </p>
 
+        {/* Deadline */}
+        {job.deadline && (
+          <p className="text-sm text-gray-500 mb-4">
+            Deadline: <strong>{formatDate(job.deadline)}</strong>
+          </p>
+        )}
+
+        {/* Job Description */}
+        <section className="mb-6">
+          <p className="font-semibold text-lg">Job Description</p>
+          <hr className="my-2" />
+          <p className="text-sm text-gray-700 whitespace-pre-line">{job.description}</p>
+        </section>
+
+        {/* Domain */}
+        <section className="mb-6">
+          <p className="font-semibold text-lg">Domain</p>
+          <hr className="my-2" />
+          <p className="text-sm text-gray-700">{job.domain}</p>
+        </section>
+
+        {/* Experience */}
+        <section className="mb-6">
+          <p className="font-semibold text-lg">Experience Required</p>
+          <hr className="my-2" />
+          <p className="text-sm text-gray-700">{job.experienceRequired || "Not specified"}</p>
+        </section>
+
+        {/* Cover Letter */}
         {coverLetter && (
-          <>
-            <p className="font-semibold">Your Cover Letter</p>
-            <hr className="mb-2" />
-            <p className="text-sm text-gray-700 whitespace-pre-wrap mb-4">{coverLetter}</p>
-          </>
+          <section className="mb-6">
+            <p className="font-semibold text-lg">Your Cover Letter</p>
+            <hr className="my-2" />
+            <p className="text-sm text-gray-700 whitespace-pre-wrap">{coverLetter}</p>
+          </section>
         )}
       </div>
     </Layout>

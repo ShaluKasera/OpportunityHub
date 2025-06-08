@@ -4,13 +4,25 @@ import axios from "axios";
 import Layout from "../../components/Layout/Layout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {jwtDecode} from "jwt-decode"; 
 
 const Detail = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const isLoggedIn = !!localStorage.getItem("token");
+  const [userRole, setUserRole] = useState(null); 
+
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
+
+  // ✅ Decode token to get user role
+  useEffect(() => {
+    if (token) {
+      const decoded = jwtDecode(token);
+      setUserRole(decoded.role); 
+    }
+  }, [token]);
 
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-US", {
@@ -42,8 +54,6 @@ const Detail = () => {
   const handleApply = async () => {
     try {
       setApplying(true);
-      const token = localStorage.getItem("token");
-
       const res = await axios.post(
         "http://localhost:8000/api/seeker/apply-job",
         {
@@ -61,11 +71,7 @@ const Detail = () => {
       toast.success(res.data.message || "Applied successfully");
     } catch (err) {
       console.error("Apply job error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
-      } else {
-        toast.error("Failed to apply to job");
-      }
+      toast.error(err.response?.data?.message || "Failed to apply to job");
     } finally {
       setApplying(false);
     }
@@ -93,7 +99,7 @@ const Detail = () => {
             </div>
           </div>
 
-          {isLoggedIn && (
+          {isLoggedIn && userRole === "job_seeker" && (
             <button
               onClick={handleApply}
               disabled={applying}
@@ -108,6 +114,7 @@ const Detail = () => {
           )}
         </div>
 
+        {/* Job Details */}
         <p className="font-semibold mb-1">Job Description</p>
         <hr className="mb-2" />
         <p className="text-sm text-gray-700 mb-4">{job.description}</p>

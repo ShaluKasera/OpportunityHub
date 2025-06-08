@@ -32,7 +32,6 @@ const JobApplication = sequelize.define(
         "reviewed",
         "accepted",
         "interview",
-        "offered",
         "rejected"
       ),
       defaultValue: "applied",

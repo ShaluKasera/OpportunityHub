@@ -343,16 +343,15 @@ const deleteJob = async (req, res) => {
       await t.rollback();
       return res.status(404).json({ message: "Job not found or unauthorized" });
     }
-     
-    await Job.destroy({ where: { id: jobId },transaction: t  });
+
+    await Job.destroy({ where: { id: jobId }, transaction: t });
     await t.commit();
     res.status(200).json({ message: "Job deleted successfully" });
   } catch (error) {
-      await t.rollback();
+    await t.rollback();
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllJobs = async (req, res) => {
   const userId = req.user.id;
@@ -376,7 +375,7 @@ const getAllJobs = async (req, res) => {
     }
 
     if (salaryRange) {
-      const [min, max] = salaryRange.split(',').map(Number);
+      const [min, max] = salaryRange.split(",").map(Number);
       whereClause.salary = { [Op.between]: [min, max] };
     }
 
@@ -393,19 +392,16 @@ const getAllJobs = async (req, res) => {
   }
 };
 
-
 const getPostedJobById = async (req, res) => {
   const userId = req.user.id;
   const { jobId } = req.params;
 
   try {
-   
     const employer = await Employer.findOne({ where: { userId } });
     if (!employer) {
       return res.status(404).json({ message: "Employer profile not found" });
     }
 
-   
     const job = await Job.findOne({
       where: {
         id: jobId,
@@ -428,9 +424,11 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
   const userId = req.user.id;
   const { jobId } = req.body;
   const t = await sequelize.transaction();
+  if (!jobId || isNaN(Number(jobId))) {
+    return res.status(400).json({ message: "Invalid or missing jobId." });
+  }
 
   try {
-   
     const employer = await Employer.findOne({
       where: { userId },
       include: [{ model: User, as: "user", attributes: ["name", "email"] }],
@@ -449,7 +447,9 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
 
     if (!job) {
       await t.rollback();
-      return res.status(404).json({ message: "Job not found or unauthorized." });
+      return res
+        .status(404)
+        .json({ message: "Job not found or unauthorized." });
     }
 
     const requiredSkills = job.skills || [];
@@ -530,18 +530,21 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
 
     if (offersSent === 0) {
       await t.commit();
-      return res.status(200).json({ message: "No matching or eligible job seekers found." });
+      return res
+        .status(200)
+        .json({ message: "No matching or eligible job seekers found." });
     }
 
     await t.commit();
-    res.status(200).json({ message: `Job offers sent to ${offersSent} job seekers.` });
+    res
+      .status(200)
+      .json({ message: `Job offers sent to ${offersSent} job seekers.` });
   } catch (error) {
     await t.rollback();
     console.error("Error sending job offers:", error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllJobSeekersOffered = async (req, res) => {
   const userId = req.user.id;
@@ -601,8 +604,6 @@ const getAllJobSeekersOffered = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 const getAllAcceptedJobSeekers = async (req, res) => {
   const userId = req.user.id;
@@ -732,17 +733,17 @@ const getApplicationsByJobId = async (req, res) => {
   const { jobId } = req.body;
 
   const userId = req.user.id;
-    const employer = await Employer.findOne({
-      where: { userId: userId },
-    });
+  const employer = await Employer.findOne({
+    where: { userId: userId },
+  });
 
-    if (!employer) {
-      return res.status(404).json({
-        success: false,
-        message: "Employer profile not found",
-      });
-    }
- const employerId = employer.id;
+  if (!employer) {
+    return res.status(404).json({
+      success: false,
+      message: "Employer profile not found",
+    });
+  }
+  const employerId = employer.id;
 
   try {
     const job = await Job.findOne({ where: { id: jobId } });
@@ -782,21 +783,32 @@ const getApplicationsByJobId = async (req, res) => {
 const updateApplicationStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const employerId = req.user.id;
+  const userId = req.user.id;
+  const employer = await Employer.findOne({
+    where: { userId: userId },
+  });
+
+  if (!employer) {
+    return res.status(404).json({
+      success: false,
+      message: "Employer profile not found",
+    });
+  }
+  const employerId = employer.id;
   const t = await sequelize.transaction();
 
   try {
-    const application = await JobApplication.findByPk(id,{ transaction: t });
+    const application = await JobApplication.findByPk(id, { transaction: t });
 
     if (!application) {
       await t.rollback();
       return res.status(404).json({ message: "Application not found" });
     }
 
-    const job = await Job.findByPk(application.jobId,{ transaction: t });
+    const job = await Job.findByPk(application.jobId, { transaction: t });
 
     if (!job || job.employerId !== employerId) {
-       await t.rollback();
+      await t.rollback();
       return res
         .status(403)
         .json({ message: "Unauthorized to update this application" });
@@ -807,12 +819,11 @@ const updateApplicationStatus = async (req, res) => {
 
     await t.commit();
 
-
     res
       .status(200)
       .json({ message: "Application status updated", application });
   } catch (error) {
-     await t.rollback();
+    await t.rollback();
     console.error("Error updating application status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -846,6 +857,146 @@ const getAllApplications = async (req, res) => {
   }
 };
 
+const getallappliedjobSeeker = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "applied" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getallreviewedjobSeeker = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "reviewed" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getallacceptedjobSeeker = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "accepted" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getallinterviewjobSeeker = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "interview" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const getallrejectedjobSeeker = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "rejected" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error fetching all applications:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports = {
   // employerSignin,
@@ -864,4 +1015,9 @@ module.exports = {
   getApplicationsByJobId,
   updateApplicationStatus,
   getAllApplications,
+  getallappliedjobSeeker,
+  getallreviewedjobSeeker,
+  getallacceptedjobSeeker,
+  getallinterviewjobSeeker,
+  getallrejectedjobSeeker,
 };

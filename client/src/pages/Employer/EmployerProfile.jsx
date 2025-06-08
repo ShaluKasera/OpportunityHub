@@ -25,18 +25,6 @@ const EmployerProfile = () => {
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isCompanyEditOpen, setIsCompanyEditOpen] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("posted");
-
-  const postedJobs = [
-    { id: 1, title: "Software Engineer", applicants: 12 },
-    { id: 2, title: "UI/UX Designer", applicants: 5 },
-  ];
-
-  const jobApplications = [
-    { id: 1, applicant: "John Doe", position: "Software Engineer" },
-    { id: 2, applicant: "Alice Johnson", position: "UI/UX Designer" },
-  ];
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -62,8 +50,6 @@ const EmployerProfile = () => {
 
           const userData = data.user || {};
 
-          console.log(userData);
-
           setUser((prev) => ({
             ...prev,
             name: userData.name,
@@ -83,8 +69,6 @@ const EmployerProfile = () => {
             phone: data.phone,
             isVerified: data.isVerified,
           });
-
-          console.log("Fetched name:", userData.name);
         } catch (error) {
           console.error("Failed to fetch profile:", error.message);
         }
@@ -178,64 +162,75 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div className="container py-6 max-w-4xl mx-auto space-y-10">
+    <div className="container px-4 py-6 max-w-4xl mx-auto space-y-10">
       {/* Profile Section */}
-      <section className="relative bg-white p-6 border rounded-xl shadow">
-        <p className="text-3xl font-bold mb-4 Ysabeau_Infant">Profile</p>
+      <section className="relative bg-white p-4 sm:p-6 border rounded-xl shadow">
+        <p className="text-2xl sm:text-3xl font-bold mb-4 Ysabeau_Infant">
+          Profile
+        </p>
         <button
           className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
           onClick={() => setIsProfileEditOpen(true)}
         >
           Edit
         </button>
-        <div className="flex items-center space-x-10 px-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-10 px-2 sm:px-6">
           <img
             src={user.profilePic}
             alt={`${user.name} profile`}
             className="w-24 h-24 rounded-full object-cover border-2 border-red-700"
           />
-          <div>
-            <p className="text-2xl font-extrabold Ysabeau_Infant mb-1">{user.name}</p>
-            <p className="text-gray-600 mb-1">{user.email}</p>
+          <div className="text-center sm:!text-left w-full sm:w-auto">
+            <p className="text-xl sm:text-2xl font-extrabold Ysabeau_Infant mb-1">
+              {user.name}
+            </p>
+            <p className="text-gray-600 mb-1 break-all max-w-full">
+              {user.email}
+            </p>
             <p className="text-gray-600">{user.location}</p>
           </div>
         </div>
       </section>
 
       {/* Company Info */}
-      <section className="relative bg-white p-6 border rounded-xl shadow space-y-2">
-        <p className="text-3xl font-bold mb-4 Ysabeau_Infant">
+      <section className="relative bg-white p-4 sm:p-6 border rounded-xl shadow">
+        <p className="text-2xl sm:text-3xl font-bold mb-4 Ysabeau_Infant">
           Company Details
         </p>
+
         <button
           className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
           onClick={() => setIsCompanyEditOpen(true)}
         >
           Edit
         </button>
-        <div className="grid grid-cols-2 gap-3 text-gray-700 text-sm">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm break-words w-full">
           <div>
             <span className="font-semibold">Company Name:</span>{" "}
-            {employer.companyName}
+            <span className="break-words">{employer.companyName}</span>
           </div>
           <div>
             <span className="font-semibold">Company Size:</span>{" "}
-            {employer.companySize}
+            <span className="break-words">{employer.companySize}</span>
           </div>
           <div>
-            <span className="font-semibold">Industry:</span> {employer.industry}
+            <span className="font-semibold">Industry:</span>{" "}
+            <span className="break-words">{employer.industry}</span>
           </div>
           <div>
-            <span className="font-semibold">Phone:</span> {employer.phone}
+            <span className="font-semibold">Phone:</span>{" "}
+            <span className="break-words">{employer.phone}</span>
           </div>
-          <div className="col-span-2">
-            <span className="font-semibold">Location:</span> {employer.location}
+          <div className="col-span-1 sm:col-span-2">
+            <span className="font-semibold">Location:</span>{" "}
+            <span className="break-words">{employer.location}</span>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 sm:col-span-2">
             <span className="font-semibold">Description:</span>{" "}
-            {employer.description}
+            <span className="break-words">{employer.description}</span>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 sm:col-span-2">
             <span className="font-semibold">Verified:</span>{" "}
             <span
               className={`font-semibold ${
@@ -248,74 +243,26 @@ const EmployerProfile = () => {
         </div>
       </section>
 
-      {/* Tabs */}
-      <section className="bg-white p-6 rounded-xl border shadow">
-        <div className="flex space-x-4 border-b gap-4 border-gray-300 mb-6">
-          <button
-            onClick={() => setActiveTab("posted")}
-            className={`pb-2 font-semibold text-sm ${
-              activeTab === "posted"
-                ? "border-b-2 border-red-700 text-red-700"
-                : "text-gray-500"
-            }`}
-          >
-            Posted Jobs
-          </button>
-          <button
-            onClick={() => setActiveTab("applications")}
-            className={`pb-2 font-semibold text-sm ${
-              activeTab === "applications"
-                ? "border-b-2 border-red-700 text-red-700"
-                : "text-gray-500"
-            }`}
-          >
-            Applications
-          </button>
-        </div>
-
-        <ul className="space-y-4">
-          {(activeTab === "posted" ? postedJobs : jobApplications).map(
-            (job) => (
-              <li
-                key={job.id}
-                className="p-4 border border-gray-200 rounded hover:shadow cursor-pointer"
-              >
-                {activeTab === "posted" ? (
-                  <>
-                    <h4 className="font-semibold">{job.title}</h4>
-                    <p className="text-gray-600">{job.applicants} applicants</p>
-                  </>
-                ) : (
-                  <>
-                    <h4 className="font-semibold">{job.applicant}</h4>
-                    <p className="text-gray-600">Applied for {job.position}</p>
-                  </>
-                )}
-              </li>
-            )
-          )}
-          {(activeTab === "posted" && postedJobs.length === 0) ||
-          (activeTab === "applications" && jobApplications.length === 0) ? (
-            <p>No data found.</p>
-          ) : null}
-        </ul>
-      </section>
+      
       {/* Profile Edit Modal */}
       {isProfileEditOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md space-y-4 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-0">
+          <div className="bg-white p-4 sm:p-6 rounded-xl w-full max-w-md space-y-4 relative overflow-auto max-h-[90vh]">
             <button
               className="absolute top-2 right-4 text-red-600 text-2xl font-bold"
               onClick={() => setIsProfileEditOpen(false)}
+              aria-label="Close Profile Edit"
             >
               ×
             </button>
-            <p className="text-3xl font-bold Ysabeau_Infant">Edit Profile</p>
+            <p className="text-2xl sm:text-3xl font-bold Ysabeau_Infant">
+              Edit Profile
+            </p>
             <input
               type="text"
               name="name"
               value={user.name}
-              onChange={handleProfileChange} // added handler here
+              onChange={handleProfileChange}
               placeholder="Name"
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
             />
@@ -323,7 +270,7 @@ const EmployerProfile = () => {
               type="email"
               name="email"
               value={user.email}
-              onChange={handleProfileChange} // you might want to disable editing email here if backend doesn't allow update
+              onChange={handleProfileChange}
               placeholder="Email"
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
               disabled
@@ -331,7 +278,7 @@ const EmployerProfile = () => {
 
             <Button
               variant="outline-danger"
-              onClick={handleSaveProfile} // added save handler
+              onClick={handleSaveProfile}
               className="w-full font-bold"
             >
               Save
@@ -342,22 +289,23 @@ const EmployerProfile = () => {
 
       {/* Company Edit Modal */}
       {isCompanyEditOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md space-y-4 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-0">
+          <div className="bg-white p-4 sm:p-6 rounded-xl w-full max-w-md space-y-4 relative overflow-auto max-h-[90vh]">
             <button
               className="absolute top-2 right-4 text-red-600 text-2xl font-bold"
               onClick={() => setIsCompanyEditOpen(false)}
+              aria-label="Close Company Edit"
             >
               ×
             </button>
-            <p className="text-3xl font-bold Ysabeau_Infant">
+            <p className="text-2xl sm:text-3xl font-bold Ysabeau_Infant">
               Edit Company Details
             </p>
             <input
               type="text"
               name="companyName"
               value={employer.companyName}
-              onChange={handleCompanyChange} // added handler here
+              onChange={handleCompanyChange}
               placeholder="Company Name"
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
             />
@@ -399,10 +347,11 @@ const EmployerProfile = () => {
               onChange={handleCompanyChange}
               placeholder="Company Description"
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              rows={4}
             />
             <Button
               variant="outline-danger"
-              onClick={handleSaveCompany} 
+              onClick={handleSaveCompany}
               className="w-full font-bold"
             >
               Save

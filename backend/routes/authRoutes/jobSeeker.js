@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   jobSeekerSignup,
-  // jobSeekerSignin,
+ 
   getMyProfile,
   updateSeekerProfile,
   getJobById,
@@ -18,7 +18,6 @@ const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
 
 router.post("/signup", jobSeekerSignup);
-// router.post("/login", jobSeekerSignin);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
 router.put(
   "/profile",

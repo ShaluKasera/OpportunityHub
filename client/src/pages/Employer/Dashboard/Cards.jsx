@@ -9,7 +9,7 @@ const calculateDaysLeft = (deadline) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   return diffDays > 0 ? diffDays : 0;
-};  
+};
 
 const Cards = ({ job }) => {
   return (
@@ -38,7 +38,7 @@ const Cards = ({ job }) => {
         {job.domain}
       </p>
 
-      <div className="text-gray-600 text-sm mb-4 h-10 overflow-y-auto break-words pr-1 scrollbar-thin scrollbar-thumb-gray-300">
+      <div className="text-gray-600 text-sm mb-4 h-20 w-72  overflow-y-auto break-words pr-1 scrollbar-thin scrollbar-thumb-gray-300">
         {job.description}
       </div>
 
@@ -55,7 +55,7 @@ const Cards = ({ job }) => {
       </div>
 
       <Link
-        to={`/job-details/${job.id}`}
+        to={`/posted-job/${job.id}`}
         className="block  text-center !no-underline !text-red-700 border-2 border-red-700 py-2 rounded-xl hover:bg-red-700 hover:!text-white transition-all duration-700 Ysabeau_Infant  font-bold text-xl"
       >
         View Details

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  employerSignin,
   EmployerSignup,
   getMyProfile,
   updateEmployerProfile,
@@ -18,19 +17,23 @@ const {
   getApplicationsByJobId,
   updateApplicationStatus,
   getAllApplications,
+  getallacceptedjobSeeker,
+  getallappliedjobSeeker,
+  getallinterviewjobSeeker,
+  getallrejectedjobSeeker,
+  getallreviewedjobSeeker
 } = require("../../controllers/authController/employer");
 
 const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
 
 router.post("/signup", EmployerSignup);
-// router.post("/login", employerSignin);
 
 router.get("/profile", auth, authorizeRoles(["employer"]), getMyProfile);
 router.put('/profile',auth,authorizeRoles(["employer"]),updateEmployerProfile)
 
 router.post("/post-job", auth, authorizeRoles(["employer"]), postJob);
-router.post("/update-job/:jobId", auth, authorizeRoles(["employer"]), updateJob);
+router.put("/update-job/:jobId", auth, authorizeRoles(["employer"]), updateJob);
 router.delete("/delete-job/:jobId", auth, authorizeRoles(["employer"]), deleteJob);
 router.get("/posted-joblist", auth, authorizeRoles(["employer"]), getAllJobs);
 router.get("/posted-joblist/:jobId", auth, authorizeRoles(["employer"]), getPostedJobById);
@@ -70,7 +73,7 @@ router.get(
   getApplicationsByJobId
 );
 
-router.post(
+router.put(
   "/update-application-status/:id",
   auth,
   authorizeRoles(["employer"]),
@@ -83,4 +86,34 @@ router.get(
   getAllApplications
 );
 
+router.get(
+  "/accepted-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallacceptedjobSeeker
+);
+router.get(
+  "/review-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallreviewedjobSeeker
+);
+router.get(
+  "/interview-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallinterviewjobSeeker
+);
+router.get(
+  "/rejected-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallrejectedjobSeeker
+);
+router.get(
+  "/applied-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallappliedjobSeeker
+);
 module.exports = router;

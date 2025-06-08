@@ -12,11 +12,15 @@ import JobPage from "./pages/Jobs/JobPage";
 import PostJob from "./pages/Employer/PostJob";
 import AppliedJobDetail from "./pages/Seeker/AppliedJobDetail";
 import OfferedJobDetails from "./pages/Seeker/OfferedJobDetails";
+import PostedJobDetail from "./pages/Employer/PostedJobDetail";
+import ApplicationsDetail from "./pages/Employer/Applicationsdetails";
+import Dashboard from "./pages/Employer/Dashboard/Dashboard";
+import ManageApplication from "./pages/Employer/ManageApplications/ManageApplication";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>  
+      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/forgetPassword" element={<ForgetPassword />} />
         <Route path="/signup" element={<Signup />} />
@@ -29,8 +33,18 @@ function App() {
           path="/applied-job-details/:jobId"
           element={<AppliedJobDetail />}
         />
-       <Route path="/offered-job-details/:id" element={<OfferedJobDetails />} />
+        <Route
+          path="/offered-job-details/:id"
+          element={<OfferedJobDetails />}
+        />
+        <Route path="/posted-job/:jobId" element={<PostedJobDetail />} />
+        <Route
+          path="/application-detail/:jobId"
+          element={<ApplicationsDetail />}
+        />
 
+        <Route path="/employer-dashboard" element={<Dashboard />} />
+        <Route path="/manage-applications" element={<ManageApplication />} />
       </Routes>
     </BrowserRouter>
   );

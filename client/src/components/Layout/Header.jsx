@@ -3,23 +3,25 @@ import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaLinkedin } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
-import Dropdown from "react-bootstrap/Dropdown";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Dropdown,
+  Modal,
+  Form,
+} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("job_seeker");
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +33,6 @@ const Header = () => {
       });
 
       const { token, user: userData, employer, jobSeeker } = res.data;
-
       localStorage.setItem("token", token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
@@ -43,17 +44,17 @@ const Header = () => {
       setUser(loggedInUser);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       setShowLogin(false);
-      toast.success("Login successful!");
+      alert("Login successful!");
     } catch (err) {
       const message =
         err.response?.data?.message || "Login failed. Please try again.";
       setError(message);
-      toast.error(message);
+      alert(message);
     }
   };
 
   const logout = () => {
-     toast.success("Logged out successfully.");
+    alert("Logged out successfully.");
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -89,61 +90,86 @@ const Header = () => {
         )}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        <Dropdown.Item as={Link} to="/profile" className="link">
+        <Dropdown.Item as={Link} to="/profile" onClick={() => setExpanded(false)}>
           My Account
         </Dropdown.Item>
         <Dropdown.Divider />
-        <Dropdown.Item
-          onClick={logout}
-          className="d-flex align-items-center justify-content-between link"
-          style={{ cursor: "pointer" }}
-        >
+        <Dropdown.Item onClick={logout} className="d-flex justify-content-between">
           Logout
-          <IoLogOutOutline className="ms-2" size={20} />
+          <IoLogOutOutline size={20} />
         </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );
 
   return (
-    <div>
-       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-   
-    <header className="bg-gray-100 text-white py-7 px-24 flex justify-between items-center">
-      <div className="text-4xl Zen_Dots font-bold text-black">
-        Job<span className="text-red-700">Hunt</span>
-      </div>
+    <>
+      <Navbar
+        bg="light"
+        expand="lg"
+        className="py-3 px-3 px-md-5 shadow-sm"
+        expanded={expanded}
+      >
+        <Container fluid>
+          <Navbar.Brand as={Link} to="/" className="!text-3xl fw-bold">
+            Job<span className="text-danger">Hunt</span>
+          </Navbar.Brand>
+          <Navbar.Toggle
+            aria-controls="basic-navbar-nav"
+            onClick={() => setExpanded(!expanded)}
+          />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto d-flex align-items-center gap-3">
+              {user?.role === "job_seeker" && (
+                <>
+                  <Nav.Link className="link" as={Link} to="/" onClick={() => setExpanded(false)}>
+                    Home
+                  </Nav.Link>
+                  <Nav.Link className="link" as={Link} to="/job" onClick={() => setExpanded(false)}>
+                    Jobs
+                  </Nav.Link>
+                  <ProfileMenu />
+                </>
+              )}
 
-      {user?.role === "job_seeker" && (
-        <ul className="flex space-x-6 items-center">
-          <li><Link to="/" className="link">Home</Link></li>
-          <li><Link to="/job" className="link">Jobs</Link></li>
-          <li><ProfileMenu /></li>
-        </ul>
-      )}
+              {user?.role === "employer" && (
+                <>
+                  <Nav.Link as={Link} className="link" to="/employer-dashboard" onClick={() => setExpanded(false)}>
+                    Dashboard
+                  </Nav.Link>
+                  <Nav.Link as={Link} className="link" to="/post-job" onClick={() => setExpanded(false)}>
+                    Post Job
+                  </Nav.Link>
+                  <Nav.Link as={Link} className="link" to="/manage-applications" onClick={() => setExpanded(false)}>
+                    Manage Applications
+                  </Nav.Link>
+                 
+                  <ProfileMenu />
+                </>
+              )}
 
-      {user?.role === "employer" && (
-        <ul className="flex space-x-6 items-center">
-          <li><Link to="/" className="link">Dashboard</Link></li>
-          <li><Link to="/post-job" className="link">Post Job</Link></li>
-          <li><Link to="/manage-jobs" className="link">Job Applications</Link></li>
-          <li><ProfileMenu /></li>
-        </ul>
-      )}
+              {!user && (
+                <>
+                  <Nav.Link as={Link} className="link" to="/" onClick={() => setExpanded(false)}>
+                    Home
+                  </Nav.Link>
+                  <Nav.Link as={Link} className="link" to="/job" onClick={() => setExpanded(false)}>
+                    Jobs
+                  </Nav.Link>
+                  <Nav.Link className="link" onClick={() => { setShowLogin(true);  setExpanded(false); }}>
+                    Login
+                  </Nav.Link>
+                  <Nav.Link className="link" as={Link} to="/signup" onClick={() => setExpanded(false)}>
+                    Signup
+                  </Nav.Link>
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      {!user && (
-        <ul className="flex space-x-6 items-center">
-          <li><Link to="/" className="link">Home</Link></li>
-          <li><Link to="/job" className="link">Jobs</Link></li>
-          <li>
-            <button className="link bg-transparent border-0 p-0" onClick={() => setShowLogin(true)}>
-              Login
-            </button>
-          </li>
-          <li><Link to="/signup" className="link">Signup</Link></li>
-        </ul>
-      )}
-    {/* login modal */}
+      {/* Login Modal */}
       <Modal
         show={showLogin}
         onHide={() => setShowLogin(false)}
@@ -152,71 +178,70 @@ const Header = () => {
         contentClassName="p-3 rounded-xl"
       >
         <Modal.Header closeButton className="border-0 pb-0">
-          <div className="w-full">
-            <p className="text-4xl text-center font-semibold text-gray-800 Ysabeau_Infant">
-              Login
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Don’t have an account?{" "}
-              <Link to="/signup" className="link">Register now</Link>
+          <div className="w-100">
+            <p className="fs-3 text-center fw-bold text-gray-800">Login</p>
+            <p className="text-muted small text-center">
+              Don’t have an account? <Link to="/signup">Register now</Link>
             </p>
           </div>
         </Modal.Header>
 
-        <Modal.Body className="pt-0">
+        <Modal.Body>
           <Form onSubmit={handleLoginSubmit} className="space-y-4">
-
             <Form.Group controlId="formBasicEmail">
-              <Form.Label className="text-sm text-gray-700">Email Address</Form.Label>
+              <Form.Label>Email Address</Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="rounded-lg shadow-sm"
                 required
               />
             </Form.Group>
 
-            <Form.Group controlId="formBasicPassword">
-              <Form.Label className="text-sm text-gray-700">Password</Form.Label>
+            <Form.Group controlId="formBasicPassword" className="mt-3">
+              <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="rounded-lg shadow-sm"
                 required
               />
             </Form.Group>
 
-            <div className="flex justify-end text-sm">
-              <Link to="/forgetPassword" className="link">Forgot Password?</Link>
+            <div className="text-end mt-2">
+              <Link to="/forgetPassword" onClick={() => setShowLogin(false)}>
+                Forgot Password?
+              </Link>
             </div>
 
-            <Button variant="outline-danger" type="submit" className="w-full font-semibold mb-2 py-2 rounded-lg">
+            <Button
+              variant="danger"
+              type="submit"
+              className="w-100 mt-3 fw-semibold py-2"
+            >
               Login
             </Button>
 
-            <div className="flex items-center justify-center space-x-2 my-3">
-              <span className="h-px w-full bg-gray-300"></span>
-              <span className="text-sm text-gray-500">OR</span>
-              <span className="h-px w-full bg-gray-300"></span>
+            <div className="d-flex align-items-center justify-content-center my-3">
+              <span className="border-bottom w-100"></span>
+              <span className="px-2 text-muted">OR</span>
+              <span className="border-bottom w-100"></span>
             </div>
 
             <div className="d-flex justify-content-between">
-              <Button variant="outline-danger" className="flex-grow-1 me-2 d-flex align-items-center justify-content-center gap-2">
+              <Button variant="outline-danger" className="w-50 me-2 d-flex align-items-center justify-content-center gap-2">
                 <FcGoogle size={20} /> Google
               </Button>
-              <Button variant="outline-primary" className="flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+              <Button variant="outline-primary" className="w-50 d-flex align-items-center justify-content-center gap-2">
                 <FaLinkedin size={20} /> LinkedIn
               </Button>
             </div>
           </Form>
         </Modal.Body>
       </Modal>
-    </header>
-     </div>
+    </>
   );
 };
 
