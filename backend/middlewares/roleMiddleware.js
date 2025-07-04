@@ -5,12 +5,12 @@ const authorizeRoles = (roles) => {
         return res.status(401).json({ message: "Unauthorized: User not authenticated" });
       }
       if (!roles.includes(req.user.role)) {
-        return res.status(403).json({ message: "Unauthorized Access! You are not authorized to access this resource." });
+        return res.status(403).json({success:false, message: "Unauthorized Access! You are not authorized to access this resource." });
       }
       next();
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ success:false, message: "Internal Server Error" });
     }
   };
 };

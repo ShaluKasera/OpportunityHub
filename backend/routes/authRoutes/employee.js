@@ -21,22 +21,41 @@ const {
   getallappliedjobSeeker,
   getallinterviewjobSeeker,
   getallrejectedjobSeeker,
-  getallreviewedjobSeeker
+  getallreviewedjobSeeker,
 } = require("../../controllers/authController/employer");
 
 const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
+const getUploader = require("../../middlewares/cloudinaryUpload");
+const upload = getUploader("CompanyLogo_OpportunityHub");
 
-router.post("/signup", EmployerSignup);
+
+router.post("/signup", upload.single("companyLogo"), EmployerSignup);
 
 router.get("/profile", auth, authorizeRoles(["employer"]), getMyProfile);
-router.put('/profile',auth,authorizeRoles(["employer"]),updateEmployerProfile)
+
+router.put(
+  "/profile",
+  auth,
+  authorizeRoles(["employer"]),
+  updateEmployerProfile
+);
 
 router.post("/post-job", auth, authorizeRoles(["employer"]), postJob);
 router.put("/update-job/:jobId", auth, authorizeRoles(["employer"]), updateJob);
-router.delete("/delete-job/:jobId", auth, authorizeRoles(["employer"]), deleteJob);
+router.delete(
+  "/delete-job/:jobId",
+  auth,
+  authorizeRoles(["employer"]),
+  deleteJob
+);
 router.get("/posted-joblist", auth, authorizeRoles(["employer"]), getAllJobs);
-router.get("/posted-joblist/:jobId", auth, authorizeRoles(["employer"]), getPostedJobById);
+router.get(
+  "/posted-joblist/:jobId",
+  auth,
+  authorizeRoles(["employer"]),
+  getPostedJobById
+);
 
 router.post(
   "/send-jobOffer",

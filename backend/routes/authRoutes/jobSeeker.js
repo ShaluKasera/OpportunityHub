@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   jobSeekerSignup,
- 
+
   getMyProfile,
   updateSeekerProfile,
   getJobById,
@@ -16,8 +16,10 @@ const {
 } = require("../../controllers/authController/jobSeeker");
 const auth = require("../../middlewares/authMiddleware");
 const { authorizeRoles } = require("../../middlewares/roleMiddleware");
+const getUploader = require("../../middlewares/cloudinaryUpload");
+const upload = getUploader("profile_pics_OpportunityHub");
 
-router.post("/signup", jobSeekerSignup);
+router.post("/signup", upload.single("profilePic"), jobSeekerSignup);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
 router.put(
   "/profile",
@@ -58,8 +60,11 @@ router.get(
   authorizeRoles(["job_seeker"]),
   getJobOfferById
 );
-router.put("/job-offers/:id", auth,
-  authorizeRoles(["job_seeker"]), updateJobOfferStatus);
-
+router.put(
+  "/job-offers/:id",
+  auth,
+  authorizeRoles(["job_seeker"]),
+  updateJobOfferStatus
+);
 
 module.exports = router;

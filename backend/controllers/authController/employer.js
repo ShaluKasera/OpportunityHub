@@ -14,8 +14,7 @@ const {
   sendOtpEmail,
   sendJobOfferEmail,
 } = require("../../services/emailService/emailVerification");
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+const { storeOtp, generateOTP } = require("../../utils/otpHelper");
 
 const EmployerSignup = async (req, res) => {
   const t = await sequelize.transaction();
@@ -32,6 +31,7 @@ const EmployerSignup = async (req, res) => {
       description,
     } = req.body;
 
+    const companyLogo = req.file?.path || null;
     if (
       !name ||
       !email ||
@@ -43,23 +43,28 @@ const EmployerSignup = async (req, res) => {
       !industry ||
       !description
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const otp = generateOTP();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    storeOtp(email, otp);
 
     const user = await User.create(
       {
         name,
         email,
+
         password: hashedPassword,
         isEmailVerified: false,
         role: "employer",
@@ -77,22 +82,10 @@ const EmployerSignup = async (req, res) => {
         location,
         description,
         isVerified: false,
+        companyLogoUrl: companyLogo || null,
       },
       { transaction: t }
     );
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "default_secret",
-      { expiresIn: "1d" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
 
     await sendOtpEmail(email, otp, name);
     await t.commit();
@@ -115,68 +108,6 @@ const EmployerSignup = async (req, res) => {
   }
 };
 
-// const employerSignin = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     const user = await User.findOne({ where: { email } });
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     if (!user.isEmailVerified) {
-//       return res
-//         .status(403)
-//         .json({ message: "Email not verified. Please verify your email." });
-//     }
-
-//     if (user.role !== "employer") {
-//       return res.status(403).json({ message: "Not authorized as an employer" });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: "Invalid password" });
-//     }
-
-//     const employer = await Employer.findOne({ where: { userId: user.id } });
-//     if (!employer) {
-//       return res.status(404).json({ message: "Employer profile not found" });
-//     }
-
-//     if (!employer.isVerified) {
-//       return res
-//         .status(403)
-//         .json({ message: "Employer account not verified by admin." });
-//     }
-
-//     const token = jwt.sign(
-//       {
-//         id: user.id,
-//         email: user.email,
-//         role: user.role,
-//       },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1d" }
-//     );
-
-//     return res.status(200).json({
-//       message: "Login successful",
-//       token,
-//       user: {
-//         id: user.id,
-//         email: user.email,
-//         name: user.name,
-//         role: user.role,
-//       },
-//       employer,
-//     });
-//   } catch (error) {
-//     console.error("Employer Signin Error:", error);
-//     return res.status(500).json({ message: "Server error", error });
-//   }
-// };
-
 const updateEmployerProfile = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -189,6 +120,7 @@ const updateEmployerProfile = async (req, res) => {
       industry,
       location,
       description,
+      companyLogoUrl,
     } = req.body;
 
     if (name) {
@@ -210,6 +142,7 @@ const updateEmployerProfile = async (req, res) => {
     if (industry) updateData.industry = industry;
     if (location) updateData.location = location;
     if (description) updateData.description = description;
+    if (companyLogoUrl) updateData.companyLogoUrl = companyLogoUrl;
 
     if (Object.keys(updateData).length > 0) {
       await Employer.update(updateData, { where: { userId }, transaction: t });
@@ -224,8 +157,8 @@ const updateEmployerProfile = async (req, res) => {
 };
 
 const getMyProfile = async (req, res) => {
+  const userId = req.user.id;
   try {
-    const userId = req.user.id;
     const profile = await Employer.findOne({
       where: {
         userId,

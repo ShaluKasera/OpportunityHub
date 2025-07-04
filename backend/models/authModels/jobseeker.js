@@ -8,6 +8,12 @@ const JobSeeker = sequelize.define("job_seeker", {
     primaryKey: true,
     autoIncrement: true,
   },
+  profilePicUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: "Cloudinary URL for the profile picture",
+  },
+
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -37,6 +43,7 @@ const JobSeeker = sequelize.define("job_seeker", {
   phone: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   skills: {
     type: DataTypes.JSON,

@@ -1,22 +1,34 @@
-const jwt = require("jsonwebtoken");
-
-const authMiddleware = (req, res, next) => {
+const { validateToken } = require('../authServices/create&validateToken');
+const { parse } = require("cookie");
+const auth = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
+    let token;
+
+    if (req.headers.cookie) {
+      const parsedCookies = parse(req.headers.cookie);
+      token = parsedCookies.token;
     }
 
-    const token = authHeader.split(" ")[1];
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!token) {
+      return res.status(401).json({ error: "No token found. Please login." });
+    } 
+      const userPayload = validateToken(token);
+    if (!userPayload) {
+      return res.status(401).json({ error: "Invalid or expired token." });
+    }
 
-    req.user = decoded;
-
+    req.user = userPayload;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("Auth error:", error.message);
+    return res.status(500).json({ error: "Authentication failed." });
   }
 };
 
-module.exports = authMiddleware;
+module.exports = auth;
+
+

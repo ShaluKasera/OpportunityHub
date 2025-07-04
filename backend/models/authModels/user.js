@@ -35,7 +35,7 @@ const User = sequelize.define("user", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-   isApprovedForAdminRole: {
+  isApprovedForAdminRole: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },

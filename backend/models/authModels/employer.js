@@ -21,6 +21,11 @@ const Employer = sequelize.define("employer", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+   companyLogoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: "Cloudinary URL for the comapany logo",
+  },
   companySize: {
     type: DataTypes.ENUM("1-10", "11-50", "51-200", "201-500", "500+"),
     allowNull: false,
@@ -41,6 +46,7 @@ const Employer = sequelize.define("employer", {
   phone: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   isVerified: {
     type: DataTypes.BOOLEAN,

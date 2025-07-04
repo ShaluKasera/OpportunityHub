@@ -8,13 +8,12 @@ const {
 } = require("../../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const { sequelize } = require("../../config/mysql/sequelize");
 const {
   sendOtpEmail,
 } = require("../../services/emailService/emailVerification");
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+
+const { storeOtp, generateOTP } = require("../../utils/otpHelper");
 
 const jobSeekerSignup = async (req, res) => {
   const t = await sequelize.transaction();
@@ -31,6 +30,8 @@ const jobSeekerSignup = async (req, res) => {
       resumeUrl,
     } = req.body;
 
+    const profilePic = req.file?.path|| null;
+
     if (
       !name ||
       !email ||
@@ -39,21 +40,24 @@ const jobSeekerSignup = async (req, res) => {
       !domain ||
       !location ||
       !experienceYears ||
-      !skills ||
-      !resumeUrl
+      !skills
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
 
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const otp = generateOTP();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    storeOtp(email, otp);
 
     const user = await User.create(
       {
@@ -62,41 +66,31 @@ const jobSeekerSignup = async (req, res) => {
         password: hashedPassword,
         isEmailVerified: false,
         role: "job_seeker",
+      
       },
       { transaction: t }
     );
 
     const jobSeeker = await JobSeeker.create(
       {
-        userId: user.id,
+        userId: user.id,  
         phone,
         domain,
         location,
         experienceYears,
         skills,
         resumeUrl,
+        profilePicUrl: profilePic || null,
       },
       { transaction: t }
     );
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "default_secret",
-      { expiresIn: "1d" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
 
     await sendOtpEmail(email, otp, name);
     await t.commit();
 
     return res.status(201).json({
-      message: "Signup successful",
+      success: true,
+      message: "Signup successful. Please verify your email.",
       user: {
         id: user.id,
         name: user.name,
@@ -106,70 +100,16 @@ const jobSeekerSignup = async (req, res) => {
       jobSeeker,
     });
   } catch (error) {
-    console.error("Signup Error:", error);
-    return res.status(500).json({ message: "Server error", err: error });
+    console.log("Signup Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", err: error });
   }
 };
 
-// const jobSeekerSignin = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = await User.findOne({ where: { email } });
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-//     if (!user.isEmailVerified) {
-//       return res
-//         .status(404)
-//         .json({ message: "Email is not verified. Please verify the email" });
-//     }
-//     if (user.role !== "job_seeker") {
-//       return res
-//         .status(403)
-//         .json({ message: "Not authorized as a job seeker" });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: "Invalid password" });
-//     }
-
-//     const jobSeeker = await JobSeeker.findOne({ where: { userId: user.id } });
-
-//     if (!jobSeeker) {
-//       return res.status(404).json({ message: "Job seeker profile not found" });
-//     }
-
-//     const token = jwt.sign(
-//       {
-//         id:user.id,
-//         email: user.email,
-//         role: user.role,
-//       },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1d" }
-//     );
-
-//     return res.status(200).json({
-//       message: "Login successful",
-//       token,
-//       user: {
-//         id: user.id,
-//         email: user.email,
-//         name: user.name,
-//         role: user.role,
-//       },
-//       jobSeeker,
-//     });
-//   } catch (error) {
-//     console.error("Login error:", error);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
-
 const getMyProfile = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
 
   try {
     const profile = await JobSeeker.findOne({
@@ -206,6 +146,7 @@ const updateSeekerProfile = async (req, res) => {
       experienceYears,
       skills,
       resumeUrl,
+      profilePicUrl,
     } = req.body;
 
     if (name) {
@@ -228,6 +169,7 @@ const updateSeekerProfile = async (req, res) => {
     if (skills) updateData.skills = skills;
     if (location) updateData.location = location;
     if (resumeUrl) updateData.resumeUrl = resumeUrl;
+    if (profilePicUrl) updateData.profilePicUrl = profilePicUrl;
 
     if (Object.keys(updateData).length > 0) {
       await JobSeeker.update(updateData, { where: { userId }, transaction: t });
@@ -597,8 +539,8 @@ const getJobOfferById = async (req, res) => {
         message: "Job seeker profile not found",
       });
     }
- const jobSeekerId = jobSeeker.id;
-   
+    const jobSeekerId = jobSeeker.id;
+
     const jobOffer = await JobOffer.findOne({
       where: {
         id: jobOfferId,
@@ -643,35 +585,38 @@ const getJobOfferById = async (req, res) => {
   }
 };
 
-
 const updateJobOfferStatus = async (req, res) => {
   try {
-    const userId = req.user.id;  
+    const userId = req.user.id;
     const offerId = req.params.id;
     const { status } = req.body;
- 
+
     if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
     }
 
     const jobOffer = await JobOffer.findByPk(offerId);
 
     if (!jobOffer) {
-      return res.status(404).json({ success: false, message: "Job offer not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Job offer not found" });
     }
 
     jobOffer.status = status;
     jobOffer.respondedAt = new Date();
     await jobOffer.save();
 
-    res.status(200).json({ success: true, message: "Job offer updated", jobOffer });
+    res
+      .status(200)
+      .json({ success: true, message: "Job offer updated", jobOffer });
   } catch (error) {
     console.error("Update job offer error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-
 
 module.exports = {
   jobSeekerSignup,
