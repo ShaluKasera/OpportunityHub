@@ -16,7 +16,7 @@ const getUploader = (folderName) => {
     return multer({ storage });
   } catch (error) {
     console.log("Multer Error", error);
-    res.status(500).json({success:false,  message: "Internal Server Error" });
+    res.status(500).json({success:false,  message: `Multer Error: ${error}` });
   }
 };
 

@@ -22,30 +22,29 @@ const sendOtpEmail = async (toEmail, otp, name) => {
   }
 };
 
-const sendResetPasswordOtp = async (toEmail, otp, name) => {
+
+const sendResetPasswordLink = async (email, link, name) => {
   try {
     const mailOptions = {
       from: `"OppurtunityHub" <${process.env.ADMIN_EMAIL}>`,
-      to: toEmail,
-      subject: "Your OTP to Reset Password",
-      html: `
-        <p>Hello,${name}</p>
-        <p>You requested to reset your password.</p>
-        <p>Your OTP is: <b>${otp}</b></p>
-        <p>This OTP will expire in 10 minutes.</p>
-        <p>If you did not request this, please ignore this email.</p>
-      `,
+      to: email,
+      subject: "Reset Your Password - OpportunityHub",
+    html: `
+      <p>Hello ${name},</p>
+      <p>Click the link below to reset your password:</p>
+      <a href="${link}" target="_blank">${link}</a>
+      <p>This link will expire in 1 hour.</p>
+    `,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Reset password email sent:", info.messageId);
+    console.log("Email sent:", info.messageId);
     return true;
   } catch (error) {
-    console.error("Error sending reset password email:", error);
+    console.error("Error sending email verification mail:", error);
     return false;
   }
 };
-
 
 const sendJobOfferEmail = async (
   jobSeeker_email,
@@ -85,4 +84,4 @@ const sendJobOfferEmail = async (
 };
 
 
-module.exports = { sendOtpEmail, sendResetPasswordOtp, sendJobOfferEmail };
+module.exports = { sendOtpEmail, sendResetPasswordLink, sendJobOfferEmail };

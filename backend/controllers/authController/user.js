@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { User, Employer, JobSeeker, Job } = require("../../models");
 const setTokenCookie = require("../../authServices/setCookie");
@@ -8,7 +9,7 @@ const { sequelize } = require("../../config/mysql/sequelize");
 
 const {
   sendOtpEmail,
-  sendResetPasswordOtp,
+  sendResetPasswordLink,
 } = require("../../services/emailService/emailVerification");
 const { Op } = require("sequelize");
 const {
@@ -78,7 +79,7 @@ const loginUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      token:token,
+      token: token,
       user: {
         id: user.id,
         email: user.email,
@@ -91,7 +92,7 @@ const loginUser = async (req, res) => {
     console.error("Login Error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Server error", error });
+      .json({ success: false, message: `Login Error: ${error}` });
   }
 };
 
@@ -101,10 +102,10 @@ const handleLogout = (req, res) => {
     clearTokenCookie(res);
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
-    console.log(error);
+    console.log(`Logout error: ${error}`);
     return res
       .status(500)
-      .json({ success: false, message: `Server error: ${error}` });
+      .json({ success: false, message: `Logout error: ${error}` });
   }
 };
 
@@ -147,7 +148,7 @@ const verifyEmail = async (req, res) => {
       .json({ success: true, message: "Email verified successfully" });
   } catch (error) {
     console.error("Verify OTP Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: `verifyEmail error: ${error}`});
   }
 };
 
@@ -183,7 +184,7 @@ const resendOtp = async (req, res) => {
       .json({ success: true, message: "OTP resent successfully" });
   } catch (error) {
     console.error("Resend OTP Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: `ResendOtp error: ${error}` });
   }
 };
 
@@ -197,80 +198,74 @@ const forgotPassword = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Email is required" });
     }
+
     const user = await User.findOne({ where: { email } });
-    if (!user)
+    if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
+    }
 
-    const otp = generateOTP();
-    storeOtp(email, otp);
-    await sendResetPasswordOtp(email, otp, user.name);
+    const token = crypto.randomBytes(32).toString("hex");
 
-    res
-      .status(200)
-      .json({ success: true, Email: email, message: "OTP sent to your email" });
+    setTokenCookie(res, token);
+
+    const resetLink = `${process.env.CLIENT_URL}/reset-password`;
+    await sendResetPasswordLink(email, resetLink, user.name);
+    return res.status(200).json({
+      success: true,
+      message: "Password reset link sent to your email",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Forgot Password Error:", err.message);
+    res.status(500).json({ success: false, message:`Forgot Password Error:${error}` });
   }
 };
 
-//verify otp for reset password
-// const verifyOtp = (req, res) => {
-//   const { email, otp } = req.body;
-
-//   if (!isValidOtp(email, otp)) {
-//     return res.status(400).json({success:false, message: "Invalid or expired OTP" });
-//   }
-
-//   res.status(200).json({success:true, message: "OTP verified successfully" });
-// };
-
 //reset password
 const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, newPassword } = req.body;
+  const token = req.cookies.resetToken;
+
   const t = await sequelize.transaction();
 
   try {
-    if (!email || !otp || !newPassword) {
+    // Validate inputs
+    if (!email || !newPassword || !token) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({
+          success: false,
+          message: "Email, password, and token are required",
+        });
     }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const isValid = isValidOtp(email, otp);
-    if (!isValid) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid or expired OTP" });
-    }
-
-    const hashed = await bcrypt.hash(newPassword, 10);
-
-    const [updatedCount] = await User.update(
-      { password: hashed },
+    const [updated] = await User.update(
+      { password: hashedPassword },
       { where: { email }, transaction: t }
     );
 
-    if (updatedCount === 0) {
+    if (updated === 0) {
       await t.rollback();
-      return res.status(404).json({
-        success: false,
-        message: "User not found or password not updated",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found or update failed" });
     }
 
-    // Clear OTP only if password was successfully updated
-    clearOtps(email);
+    clearTokenCookie(res);
 
     await t.commit();
-    return res
-      .status(200)
-      .json({ success: true, message: "Password reset successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
   } catch (error) {
     await t.rollback();
     console.error("Reset Password Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: `Reset error: ${error}`});
   }
 };
 
@@ -328,7 +323,7 @@ const getAllJobs = async (req, res) => {
     console.error("Error fetching jobs:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching jobs",
+      message:`Error fetching jobs ${error} ` ,
     });
   }
 };
@@ -341,8 +336,8 @@ const getJodById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
     res.json({ success: true, job });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Server error" });
+  } catch (error) {
+    res.status(500).json({ success: false,  message:`Error fetching jobs by id: ${error} `});
   }
 };
 

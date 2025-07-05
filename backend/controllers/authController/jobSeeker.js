@@ -30,7 +30,7 @@ const jobSeekerSignup = async (req, res) => {
       resumeUrl,
     } = req.body;
 
-    const profilePic = req.file?.path|| null;
+    const profilePic = req.file?.path || null;
 
     if (
       !name ||
@@ -66,14 +66,13 @@ const jobSeekerSignup = async (req, res) => {
         password: hashedPassword,
         isEmailVerified: false,
         role: "job_seeker",
-      
       },
       { transaction: t }
     );
 
     const jobSeeker = await JobSeeker.create(
       {
-        userId: user.id,  
+        userId: user.id,
         phone,
         domain,
         location,
@@ -103,13 +102,12 @@ const jobSeekerSignup = async (req, res) => {
     console.log("Signup Error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Server error", err: error });
+      .json({ success: false, message: "Signup error", err: error });
   }
 };
 
 const getMyProfile = async (req, res) => {
   const userId = req.user?.id;
-
 
   try {
     const profile = await JobSeeker.findOne({
@@ -125,12 +123,14 @@ const getMyProfile = async (req, res) => {
       ],
     });
 
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
+    if (!profile) return res.status(404).json({success:false, message: "Profile not found" });
 
     res.status(200).json(profile);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
+    console.log("getMyProfile error", error);
+    return res
+      .status(500)
+      .json({ success: false, message: `getMyProfile error: ${error}` });
   }
 };
 
@@ -159,7 +159,7 @@ const updateSeekerProfile = async (req, res) => {
     });
     if (!jobSeeker) {
       await t.rollback();
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res.status(404).json({success: false, message: "Employer profile not found" });
     }
 
     const updateData = {};
@@ -175,11 +175,11 @@ const updateSeekerProfile = async (req, res) => {
       await JobSeeker.update(updateData, { where: { userId }, transaction: t });
     }
     await t.commit();
-    return res.status(200).json({ message: "Profile updated successfully" });
+    return res.status(200).json({success: true, message: "Profile updated successfully" });
   } catch (error) {
     await t.rollback();
-    console.error("Update Profile Error:", error);
-    return res.status(500).json({ message: "Server error", err: error });
+    console.error("Update Seeker Profile Error:", error);
+    return res.status(500).json({success: false, message: `Update Seeker Profile error: ${error}`});
   }
 };
 
@@ -235,7 +235,7 @@ const getAllJobs = async (req, res) => {
     console.error("Error fetching jobs:", err);
     return res.status(500).json({
       success: false,
-      message: "Server error while fetching jobs",
+      message: `Server error while fetching jobs: ${err}`,
     });
   }
 };
@@ -262,7 +262,7 @@ const getJobById = async (req, res) => {
     console.error("Error fetching job by ID:", err);
     return res.status(500).json({
       success: false,
-      message: "Server error while fetching job details",
+      message: `Server error while fetching job details ${getJobById}`,
     });
   }
 };
@@ -273,7 +273,6 @@ const applyToJob = async (req, res) => {
     const { jobId, coverLetter } = req.body;
     const jobSeekerId = req.user.id;
 
-    // ✅ Check if the user has a valid job seeker profile
     const jobSeeker = await JobSeeker.findOne({
       where: { userId: jobSeekerId },
       transaction: t,
@@ -324,7 +323,7 @@ const applyToJob = async (req, res) => {
     console.error("Error applying to job:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while applying to job",
+      message: `Server error while applying to job ${error}`,
     });
   }
 };
@@ -375,7 +374,7 @@ const getAppliedJobs = async (req, res) => {
     console.error("Error fetching applied jobs:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error while fetching applied jobs",
+      message: `Server error while fetching applied jobs: ${error}`,
     });
   }
 };
@@ -437,7 +436,7 @@ const getAppliedJobById = async (req, res) => {
     console.error("Error fetching specific applied job:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error while fetching job application",
+      message: `Server error while fetching job application ${error}`,
     });
   }
 };
@@ -479,7 +478,7 @@ const getAcceptedJobs = async (req, res) => {
     console.error("Error fetching accepted jobs:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error while fetching accepted jobs",
+      message: `Server error while fetching accepted jobs: ${error}`,
     });
   }
 };
@@ -493,7 +492,7 @@ const getJobOffersForSeeker = async (req, res) => {
     });
 
     if (!jobSeeker) {
-      return res.status(404).json({ message: "Job seeker not found" });
+      return res.status(404).json({success:false, message: "Job seeker not found" });
     }
 
     const offers = await JobOffer.findAll({
@@ -521,7 +520,8 @@ const getJobOffersForSeeker = async (req, res) => {
     res.status(200).json({ success: true, jobOffers: offers });
   } catch (error) {
     console.error("Error fetching job offers for seeker:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false,
+      message: `Error fetching job offers for seeker: ${error}`, });
   }
 };
 
@@ -580,7 +580,7 @@ const getJobOfferById = async (req, res) => {
     console.error("Error fetching job offer:", err);
     res.status(500).json({
       success: false,
-      message: "Server error while retrieving job offer",
+      message: `Server error while retrieving job offer: ${err}`,
     });
   }
 };
@@ -614,7 +614,7 @@ const updateJobOfferStatus = async (req, res) => {
       .json({ success: true, message: "Job offer updated", jobOffer });
   } catch (error) {
     console.error("Update job offer error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message:`Update job offer error: ${error}`});
   }
 };
 

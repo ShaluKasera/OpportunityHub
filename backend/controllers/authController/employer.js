@@ -31,7 +31,7 @@ const EmployerSignup = async (req, res) => {
       description,
     } = req.body;
 
-    const companyLogo = req.file?.path || null;
+    const companyLogoUrl = req.file?.path || null;
     if (
       !name ||
       !email ||
@@ -82,7 +82,7 @@ const EmployerSignup = async (req, res) => {
         location,
         description,
         isVerified: false,
-        companyLogoUrl: companyLogo || null,
+        companyLogoUrl,
       },
       { transaction: t }
     );
@@ -91,6 +91,7 @@ const EmployerSignup = async (req, res) => {
     await t.commit();
 
     return res.status(201).json({
+      success: true,
       message:
         "Signup successful,verify your email and wait until accept your profile.",
       user: {
@@ -103,8 +104,10 @@ const EmployerSignup = async (req, res) => {
     });
   } catch (error) {
     await t.rollback();
-    console.error("Signup Error:", error);
-    return res.status(500).json({ message: "Server error", err: error });
+    console.error("Employer Signup Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Employer Signup error", err: error });
   }
 };
 
@@ -132,7 +135,9 @@ const updateEmployerProfile = async (req, res) => {
       transaction: t,
     });
     if (!employer) {
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
     }
 
     const updateData = {};
@@ -148,11 +153,18 @@ const updateEmployerProfile = async (req, res) => {
       await Employer.update(updateData, { where: { userId }, transaction: t });
     }
     await t.commit();
-    return res.status(200).json({ message: "Profile updated successfully" });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Employer Profile updated successfully",
+      });
   } catch (error) {
     await t.rollback();
-    console.error("Update Profile Error:", error);
-    return res.status(500).json({ message: "Server error", err: error });
+    console.error("Update Employer Profile Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Employer Profile error", err: error });
   }
 };
 
@@ -171,19 +183,27 @@ const getMyProfile = async (req, res) => {
         },
       ],
     });
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-    res.status(200).json(profile);
+    if (!profile)
+      return res
+        .status(404)
+        .json({ success: false, message: "Profile not found" });
+    res.status(200).json({ success: true, profile });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log(`getMyProfile error: ${error}` )
+    res
+      .status(500)
+      .json({ success: false, message: `getMyProfile error: ${error}` });
   }
 };
 
 const postJob = async (req, res) => {
   const userId = req.user.id;
   const jobData = req.body;
-  if (jobData.salary && !jobData.salary.trim().startsWith("$")) {
-    return res.status(400).json({ message: "Salary must start with $" });
-  }
+  // if (jobData.salary && !jobData.salary.trim().startsWith("$")) {
+  //   return res
+  //     .status(400)
+  //     .json({ success: false, message: "Salary must start with $" });
+  // }
 
   const t = await sequelize.transaction();
 
@@ -193,17 +213,24 @@ const postJob = async (req, res) => {
       transaction: t,
     });
     if (!employer)
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
 
     const job = await Job.create(
       { employerId: employer.id, ...jobData },
       { transaction: t }
     );
     await t.commit();
-    res.status(201).json({ message: "Job posted successfully", job });
+    res
+      .status(201)
+      .json({ success: true, message: "Job posted successfully", job });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ error: error.message });
+    console.log(`Job posted error: ${error}`)
+    res
+      .status(500)
+      .json({ success: false, message: `Job posted error: ${error}` });
   }
 };
 
@@ -214,7 +241,9 @@ const updateJob = async (req, res) => {
 
   // Fix here: use updateData.salary, not jobData.salary
   if (updateData.salary && !updateData.salary.trim().startsWith("$")) {
-    return res.status(400).json({ message: "Salary must start with $" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Salary must start with $" });
   }
 
   const t = await sequelize.transaction();
@@ -226,7 +255,9 @@ const updateJob = async (req, res) => {
     });
     if (!employer) {
       await t.rollback();
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
     }
 
     const job = await Job.findOne({
@@ -235,7 +266,9 @@ const updateJob = async (req, res) => {
     });
     if (!job) {
       await t.rollback();
-      return res.status(404).json({ message: "Job not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Job not found or unauthorized" });
     }
 
     await Job.update(updateData, { where: { id: jobId }, transaction: t });
@@ -245,11 +278,17 @@ const updateJob = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Job updated successfully", job: updatedJob });
+      .json({
+        success: true,
+        message: "Job updated successfully",
+        job: updatedJob,
+      });
   } catch (error) {
     await t.rollback();
-    console.error(error);
-    res.status(500).json({ error: error.message });
+    console.error(`update Job error: ${error}`);
+    res
+      .status(500)
+      .json({ success: false, message: `update Job error: ${error}` });
   }
 };
 
@@ -265,7 +304,9 @@ const deleteJob = async (req, res) => {
     });
     if (!employer) {
       await t.rollback();
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
     }
 
     const job = await Job.findOne({
@@ -274,15 +315,22 @@ const deleteJob = async (req, res) => {
     });
     if (!job) {
       await t.rollback();
-      return res.status(404).json({ message: "Job not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Job not found or unauthorized" });
     }
 
     await Job.destroy({ where: { id: jobId }, transaction: t });
     await t.commit();
-    res.status(200).json({ message: "Job deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Job deleted successfully" });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ error: error.message });
+    console.log(`Delete Job error: ${error}`);
+    res
+      .status(500)
+      .json({ success: false, message: `Delete Job error: ${error}` });
   }
 };
 
@@ -292,7 +340,9 @@ const getAllJobs = async (req, res) => {
   try {
     const employer = await Employer.findOne({ where: { userId } });
     if (!employer)
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
 
     const { title, jobType, salaryRange, deadline } = req.query;
 
@@ -321,7 +371,9 @@ const getAllJobs = async (req, res) => {
     res.status(200).json({ success: true, jobs });
   } catch (error) {
     console.error("Error fetching jobs:", error);
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: `Error fetching jobs:: ${error}` });
   }
 };
 
@@ -332,7 +384,9 @@ const getPostedJobById = async (req, res) => {
   try {
     const employer = await Employer.findOne({ where: { userId } });
     if (!employer) {
-      return res.status(404).json({ message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
     }
 
     const job = await Job.findOne({
@@ -343,13 +397,17 @@ const getPostedJobById = async (req, res) => {
     });
 
     if (!job) {
-      return res.status(404).json({ message: "Job not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Job not found or unauthorized" });
     }
 
     res.status(200).json({ success: true, job });
   } catch (error) {
     console.error("Error fetching job by ID:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res
+      .status(500)
+      .json({ success: false, message: `getPostedJobById error: ${error}` });
   }
 };
 
@@ -358,7 +416,9 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
   const { jobId } = req.body;
   const t = await sequelize.transaction();
   if (!jobId || isNaN(Number(jobId))) {
-    return res.status(400).json({ message: "Invalid or missing jobId." });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid or missing jobId." });
   }
 
   try {
@@ -370,7 +430,9 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
 
     if (!employer) {
       await t.rollback();
-      return res.status(404).json({ message: "Employer not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer not found." });
     }
 
     const job = await Job.findOne({
@@ -382,7 +444,7 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
       await t.rollback();
       return res
         .status(404)
-        .json({ message: "Job not found or unauthorized." });
+        .json({ success: false, message: "Job not found or unauthorized." });
     }
 
     const requiredSkills = job.skills || [];
@@ -398,7 +460,9 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
 
     if (acceptedCount >= job.openings) {
       await t.rollback();
-      return res.status(400).json({ message: "Job openings already filled." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Job openings already filled." });
     }
 
     const matchingJobSeekers = await JobSeeker.findAll({
@@ -415,8 +479,8 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
     for (const jobSeeker of matchingJobSeekers) {
       const seekerSkills = jobSeeker.skills || [];
 
-      const hasMatchingSkill = requiredSkills.some((skill) =>
-        seekerSkills.includes(skill)
+      const hasMatchingSkill = requiredSkills.some((skills) =>
+        seekerSkills.includes(skills)
       );
 
       if (!hasMatchingSkill) continue;
@@ -464,18 +528,26 @@ const sendJobOffersToRelevantSeekers = async (req, res) => {
     if (offersSent === 0) {
       await t.commit();
       return res
-        .status(200)
-        .json({ message: "No matching or eligible job seekers found." });
+        .status(404)
+        .json({
+          success: false,
+          message: "No matching or eligible job seekers found.",
+        });
     }
 
     await t.commit();
     res
       .status(200)
-      .json({ message: `Job offers sent to ${offersSent} job seekers.` });
+      .json({
+        success: true,
+        message: `Job offers sent to ${offersSent} job seekers.`,
+      });
   } catch (error) {
     await t.rollback();
     console.error("Error sending job offers:", error);
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: `Error sending job offers: ${error}` });
   }
 };
 
@@ -488,7 +560,9 @@ const getAllJobSeekersOffered = async (req, res) => {
       include: [{ model: User, as: "user", attributes: ["name", "email"] }],
     });
     if (!employer)
-      return res.status(404).json({ message: "Employer not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer not found" });
 
     const offers = await JobOffer.findAll({
       where: { employerId: employer.id },
@@ -531,10 +605,12 @@ const getAllJobSeekersOffered = async (req, res) => {
           : {},
     }));
 
-    res.status(200).json({ offers: formattedOffers });
+    res.status(200).json({ success: true, offers: formattedOffers });
   } catch (error) {
     console.error("Error fetching job offers:", error);
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: `Error fetching job offers: ${error}` });
   }
 };
 
@@ -547,7 +623,9 @@ const getAllAcceptedJobSeekers = async (req, res) => {
       include: [{ model: User, as: "user", attributes: ["name", "email"] }],
     });
     if (!employer)
-      return res.status(404).json({ message: "Employer not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer not found" });
     const acceptedOffers = await JobOffer.findAll({
       where: {
         employerId: employer.id,
@@ -587,10 +665,15 @@ const getAllAcceptedJobSeekers = async (req, res) => {
       },
     }));
 
-    res.status(200).json({ acceptedJobSeekers: formattedData });
+    res.status(200).json({ success: true, acceptedJobSeekers: formattedData });
   } catch (error) {
     console.error("Error fetching accepted job seekers:", error);
-    res.status(500).json({ error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error fetching accepted job seekers: ${error}`,
+      });
   }
 };
 
@@ -605,7 +688,9 @@ const getAcceptedJobSeekerDetails = async (req, res) => {
       include: [{ model: User, as: "user", attributes: ["name", "email"] }],
     });
     if (!employer)
-      return res.status(404).json({ message: "Employer not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer not found" });
 
     const jobOffer = await JobOffer.findOne({
       where: {
@@ -637,7 +722,10 @@ const getAcceptedJobSeekerDetails = async (req, res) => {
     if (!jobOffer)
       return res
         .status(404)
-        .json({ message: "No accepted offer found for this job seeker." });
+        .json({
+          success: false,
+          message: "No accepted offer found for this job seeker.",
+        });
 
     const data = {
       job: {
@@ -655,10 +743,15 @@ const getAcceptedJobSeekerDetails = async (req, res) => {
       acceptedAt: jobOffer.respondedAt,
     };
 
-    res.status(200).json({ jobSeekerDetails: data });
+    res.status(200).json({ success: true, jobSeekerDetails: data });
   } catch (error) {
-    console.error("Error fetching job seeker details:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Error in getAcceptedJobSeekerDetails:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in getAcceptedJobSeekerDetails ${error}`,
+      });
   }
 };
 
@@ -682,13 +775,16 @@ const getApplicationsByJobId = async (req, res) => {
     const job = await Job.findOne({ where: { id: jobId } });
 
     if (!job) {
-      return res.status(404).json({ message: "Job not found" });
+      return res.status(404).json({ success: false, message: "Job not found" });
     }
 
     if (job.employerId !== employerId) {
       return res
         .status(403)
-        .json({ message: "Unauthorized access to job applications" });
+        .json({
+          success: false,
+          message: "Unauthorized access to job applications",
+        });
     }
     const applications = await JobApplication.findAll({
       where: { jobId },
@@ -708,8 +804,13 @@ const getApplicationsByJobId = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getApplicationsByJobId", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in getApplicationsByJobId: ${error}`,
+      });
   }
 };
 
@@ -735,7 +836,9 @@ const updateApplicationStatus = async (req, res) => {
 
     if (!application) {
       await t.rollback();
-      return res.status(404).json({ message: "Application not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Application not found" });
     }
 
     const job = await Job.findByPk(application.jobId, { transaction: t });
@@ -744,7 +847,10 @@ const updateApplicationStatus = async (req, res) => {
       await t.rollback();
       return res
         .status(403)
-        .json({ message: "Unauthorized to update this application" });
+        .json({
+          success: false,
+          message: "Unauthorized to update this application",
+        });
     }
 
     application.status = status;
@@ -754,11 +860,20 @@ const updateApplicationStatus = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Application status updated", application });
+      .json({
+        success: true,
+        message: "Application status updated",
+        application,
+      });
   } catch (error) {
     await t.rollback();
     console.error("Error updating application status:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error updating application status: ${error}`,
+      });
   }
 };
 
@@ -786,7 +901,12 @@ const getAllApplications = async (req, res) => {
     res.status(200).json(applications);
   } catch (error) {
     console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error fetching all applications: ${error}`,
+      });
   }
 };
 
@@ -814,8 +934,13 @@ const getallappliedjobSeeker = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getallappliedjobSeeker:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in getallappliedjobSeeker:  ${error}`,
+      });
   }
 };
 const getallreviewedjobSeeker = async (req, res) => {
@@ -842,38 +967,16 @@ const getallreviewedjobSeeker = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getallreviewedjobSeeker", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in getallreviewedjobSeeker: ${error}`,
+      });
   }
 };
-const getallacceptedjobSeeker = async (req, res) => {
-  try {
-    const applications = await JobApplication.findAll({
-      where: { status: "accepted" },
-      include: [
-        {
-          model: JobSeeker,
-          as: "jobSeeker",
-          include: [
-            {
-              model: User,
-              as: "user",
-            },
-          ],
-        },
-        {
-          model: Job,
-          as: "job",
-        },
-      ],
-    });
 
-    res.status(200).json(applications);
-  } catch (error) {
-    console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
 const getallinterviewjobSeeker = async (req, res) => {
   try {
     const applications = await JobApplication.findAll({
@@ -898,8 +1001,13 @@ const getallinterviewjobSeeker = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getallinterviewjobSeeker", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in  getallinterviewjobSeeker: ${error}`,
+      });
   }
 };
 const getallrejectedjobSeeker = async (req, res) => {
@@ -926,8 +1034,13 @@ const getallrejectedjobSeeker = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching all applications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getallrejectedjobSeeker", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in  getallrejectedjobSeeker: ${error}`,
+      });
   }
 };
 
@@ -950,7 +1063,7 @@ module.exports = {
   getAllApplications,
   getallappliedjobSeeker,
   getallreviewedjobSeeker,
-  getallacceptedjobSeeker,
+  
   getallinterviewjobSeeker,
   getallrejectedjobSeeker,
 };

@@ -17,7 +17,6 @@ const {
   getApplicationsByJobId,
   updateApplicationStatus,
   getAllApplications,
-  getallacceptedjobSeeker,
   getallappliedjobSeeker,
   getallinterviewjobSeeker,
   getallrejectedjobSeeker,
@@ -30,7 +29,7 @@ const getUploader = require("../../middlewares/cloudinaryUpload");
 const upload = getUploader("CompanyLogo_OpportunityHub");
 
 
-router.post("/signup", upload.single("companyLogo"), EmployerSignup);
+router.post("/signup", upload.single("companyLogoUrl"), EmployerSignup);
 
 router.get("/profile", auth, authorizeRoles(["employer"]), getMyProfile);
 
@@ -105,12 +104,6 @@ router.get(
   getAllApplications
 );
 
-router.get(
-  "/accepted-applications",
-  auth,
-  authorizeRoles(["employer"]),
-  getallacceptedjobSeeker
-);
 router.get(
   "/review-applications",
   auth,
