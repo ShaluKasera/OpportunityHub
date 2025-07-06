@@ -5,11 +5,11 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
-import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import toast from "react-hot-toast";
+import axios from "../../api/axios"; 
+
 const SeekerSignup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const SeekerSignup = () => {
     experienceYears: "",
     skills: "",
     resumeUrl: "",
-    profile: null,
+    profilePic: null,
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -32,14 +32,13 @@ const SeekerSignup = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (name === "profile") {
+    if (name === "profilePic") {
       const file = files[0];
-      setFormData((prev) => ({ ...prev, profile: file }));
+      setFormData((prev) => ({ ...prev, profilePic: file }));
+
       if (file) {
         const reader = new FileReader();
-        reader.onloadend = () => {
-          setProfilePreview(reader.result);
-        };
+        reader.onloadend = () => setProfilePreview(reader.result);
         reader.readAsDataURL(file);
       }
     } else {
@@ -52,43 +51,19 @@ const SeekerSignup = () => {
     setIsSubmitting(true);
 
     try {
-      const {
-        name,
-        email,
-        password,
-        phone,
-        domain,
-        location,
-        experienceYears,
-        skills,
-        resumeUrl,
-      } = formData;
+       const formPayload = new FormData();
+    
 
-      const dataToSend = {
-        name,
-        email,
-        password,
-        phone,
-        domain,
-        location,
-        experienceYears,
-        skills: skills
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s !== ""),
-        resumeUrl,
-      };
+     for (const key in formData) {
+      formPayload.append(key, formData[key]);
+    }
+      const response = await axios.post("/seeker/signup", formPayload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/seeker/signup`,
-        dataToSend,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      toast.success(response?.data?.message || "Registered successfully");
 
       setFormData({
         name: "",
@@ -100,34 +75,22 @@ const SeekerSignup = () => {
         experienceYears: "",
         skills: "",
         resumeUrl: "",
-        profile: null,
+        profilePic: null,
       });
       setProfilePreview(null);
-      toast.success(response.data.message || "Registered successfully!");
 
       setTimeout(() => {
-        navigate("/verify-email", { state: { email } });
-      }, 2000);
+        navigate("/verify-email", { state: { email: formData.email } });
+      }, 1500);
     } catch (error) {
-      const serverMessage = error.response?.data?.message;
-      console.error("Signup error:", error.response?.data || error.message);
-      toast.error(serverMessage || "Registeration Failed!");
+      console.log("Signup Error: ",error)
 
-
-      if (serverMessage === "User already exists") {
-        setTimeout(() => {
-          navigate("/verify-email", { state: { email: formData.email } });
-        }, 5000);
-      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div>
-       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-   
     <Box
       component="form"
       onSubmit={handleSubmit}
@@ -144,7 +107,7 @@ const SeekerSignup = () => {
         value={formData.name}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -156,7 +119,7 @@ const SeekerSignup = () => {
         value={formData.email}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -168,7 +131,7 @@ const SeekerSignup = () => {
         value={formData.password}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
         InputProps={{
           endAdornment: (
@@ -194,7 +157,7 @@ const SeekerSignup = () => {
         value={formData.phone}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -206,7 +169,7 @@ const SeekerSignup = () => {
         value={formData.domain}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -217,7 +180,7 @@ const SeekerSignup = () => {
         value={formData.location}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -229,7 +192,7 @@ const SeekerSignup = () => {
         value={formData.experienceYears}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -241,7 +204,7 @@ const SeekerSignup = () => {
         value={formData.skills}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -254,7 +217,7 @@ const SeekerSignup = () => {
         value={formData.resumeUrl}
         onChange={handleChange}
         margin="normal"
-        color="error" 
+        color="error"
         required
       />
 
@@ -262,9 +225,9 @@ const SeekerSignup = () => {
         <InputLabel>Profile Picture</InputLabel>
         <input
           type="file"
-          name="profile"
+          name="profilePic"
           accept="image/*"
-          color="error" 
+          color="error"
           onChange={handleChange}
           style={{ marginTop: "8px" }}
         />
@@ -281,16 +244,13 @@ const SeekerSignup = () => {
 
       <Button
         variant="outline-danger"
-        color="error"
         type="submit"
         className="!w-full mt-3"
-        sx={{ mt: 3 }}
         disabled={isSubmitting}
       >
         {isSubmitting ? "Registering..." : "Register as Job Seeker"}
       </Button>
     </Box>
-     </div>
   );
 };
 

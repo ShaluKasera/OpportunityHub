@@ -1,80 +1,77 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { FaUserCircle, FaLinkedin } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
-import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { Navbar, Nav, Container, Dropdown } from "react-bootstrap";
+import toast, { Toaster } from "react-hot-toast";
 
-import {
-  Navbar,
-  Nav,
-  Container,
-  Button,
-  Dropdown,
-  Modal,
-  Form,
-} from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
+import axios from "../../api/axios";
+import Login from "../../pages/Auth/Login";
 
 const Header = () => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
-
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/login`, {
-        email,
-        password,
-      });
-
-      const { token, user: userData, employer, jobSeeker } = res.data;
-      localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      const loggedInUser = {
-        ...userData,
-        profileData: userData.role === "employer" ? employer : jobSeeker,
-      };
-
-      setUser(loggedInUser);
-      localStorage.setItem("user", JSON.stringify(loggedInUser));
-      setShowLogin(false);
-      alert("Login successful!");
-    } catch (err) {
-      const message =
-        err.response?.data?.message || "Login failed. Please try again.";
-      setError(message);
-      alert(message);
-    }
-  };
-
-  const logout = () => {
-    alert("Logged out successfully.");
-    setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    delete axios.defaults.headers.common["Authorization"];
-     navigate("/");
-  };
-
   useEffect(() => {
+    const consent = localStorage.getItem("cookieConsent");
     const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
 
-    if (token && userData) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(JSON.parse(userData));
+    // ✅ Try localStorage first
+    const storedUser = localStorage.getItem("user");
+    const storedRole = localStorage.getItem("role");
+
+    if (storedUser && storedRole) {
+      setUser(JSON.parse(storedUser));
+      setRole(storedRole);
+      return; // Skip fetch if already stored
     }
+
+    if (consent !== "accepted" || !token) return;
+
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/user/me", { withCredentials: true });
+        setUser(res.data);
+        setRole(res.data.role);
+
+        // Optional: store again in localStorage
+        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("role", res.data.role);
+      } catch (err) {
+        setUser(null);
+        setRole(null);
+      }
+    };
+
+    fetchUser();
   }, []);
+
+  const handleMyAccount = () => {
+    if (role === "employer") {
+      navigate("/profile");
+    } else if (role === "job_seeker") {
+      navigate("/profile");
+    } else {
+      navigate("/");
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await axios.post("/user/logout", {}, { withCredentials: true });
+      toast.success("Logged out successfully");
+      setUser(null);
+      setRole(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
+    } catch (err) {
+      // Error is globally handled
+      toast.error("Logout failed");
+    }
+  };
 
   const ProfileMenu = () => (
     <Dropdown align="end">
@@ -95,11 +92,19 @@ const Header = () => {
         )}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        <Dropdown.Item as={Link} to="/profile" onClick={() => setExpanded(false)}>
+        <Dropdown.Item
+          onClick={() => {
+            setExpanded(false);
+            handleMyAccount();
+          }}
+        >
           My Account
         </Dropdown.Item>
         <Dropdown.Divider />
-        <Dropdown.Item onClick={logout} className="d-flex justify-content-between">
+        <Dropdown.Item
+          onClick={logout}
+          className="d-flex justify-content-between"
+        >
           Logout
           <IoLogOutOutline size={20} />
         </Dropdown.Item>
@@ -109,6 +114,7 @@ const Header = () => {
 
   return (
     <>
+      <Toaster reverseOrder={false} />
       <Navbar
         bg="light"
         expand="lg"
@@ -125,46 +131,74 @@ const Header = () => {
           />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto d-flex align-items-center gap-3">
-              {user?.role === "job_seeker" && (
+              {role === "job_seeker" && (
                 <>
-                  <Nav.Link className="link" as={Link} to="/" onClick={() => setExpanded(false)}>
+                  <Nav.Link as={Link} to="/" onClick={() => setExpanded(false)}>
                     Home
                   </Nav.Link>
-                  <Nav.Link className="link" as={Link} to="/job" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/job"
+                    onClick={() => setExpanded(false)}
+                  >
                     Jobs
                   </Nav.Link>
                   <ProfileMenu />
                 </>
               )}
 
-              {user?.role === "employer" && (
+              {role === "employer" && (
                 <>
-                  <Nav.Link as={Link} className="link" to="/employer-dashboard" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/employer-dashboard"
+                    onClick={() => setExpanded(false)}
+                  >
                     Dashboard
                   </Nav.Link>
-                  <Nav.Link as={Link} className="link" to="/post-job" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/post-job"
+                    onClick={() => setExpanded(false)}
+                  >
                     Post Job
                   </Nav.Link>
-                  <Nav.Link as={Link} className="link" to="/manage-applications" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/manage-applications"
+                    onClick={() => setExpanded(false)}
+                  >
                     Manage Applications
                   </Nav.Link>
-                 
                   <ProfileMenu />
                 </>
               )}
 
               {!user && (
                 <>
-                  <Nav.Link as={Link} className="link" to="/" onClick={() => setExpanded(false)}>
+                  <Nav.Link as={Link} to="/" onClick={() => setExpanded(false)}>
                     Home
                   </Nav.Link>
-                  <Nav.Link as={Link} className="link" to="/job" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/job"
+                    onClick={() => setExpanded(false)}
+                  >
                     Jobs
                   </Nav.Link>
-                  <Nav.Link className="link" onClick={() => { setShowLogin(true);  setExpanded(false); }}>
+                  <Nav.Link
+                    onClick={() => {
+                      setShowLogin(true);
+                      setExpanded(false);
+                    }}
+                  >
                     Login
                   </Nav.Link>
-                  <Nav.Link className="link" as={Link} to="/signup" onClick={() => setExpanded(false)}>
+                  <Nav.Link
+                    as={Link}
+                    to="/signup"
+                    onClick={() => setExpanded(false)}
+                  >
                     Signup
                   </Nav.Link>
                 </>
@@ -175,77 +209,16 @@ const Header = () => {
       </Navbar>
 
       {/* Login Modal */}
-      <Modal
+      <Login
         show={showLogin}
-        onHide={() => setShowLogin(false)}
-        centered
-        dialogClassName="modal-90w"
-        contentClassName="p-3 rounded-xl"
-      >
-        <Modal.Header closeButton className="border-0 pb-0">
-          <div className="w-100">
-            <p className="fs-3 text-center fw-bold text-gray-800">Login</p>
-            <p className="text-muted small text-center">
-              Don’t have an account? <Link to="/signup">Register now</Link>
-            </p>
-          </div>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Form onSubmit={handleLoginSubmit} className="space-y-4">
-            <Form.Group controlId="formBasicEmail">
-              <Form.Label>Email Address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group controlId="formBasicPassword" className="mt-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <div className="text-end mt-2">
-              <Link to="/forgetPassword" onClick={() => setShowLogin(false)}>
-                Forgot Password?
-              </Link>
-            </div>
-
-            <Button
-              variant="danger"
-              type="submit"
-              className="w-100 mt-3 fw-semibold py-2"
-            >
-              Login
-            </Button>
-
-            <div className="d-flex align-items-center justify-content-center my-3">
-              <span className="border-bottom w-100"></span>
-              <span className="px-2 text-muted">OR</span>
-              <span className="border-bottom w-100"></span>
-            </div>
-
-            <div className="d-flex justify-content-between">
-              <Button variant="outline-danger" className="w-50 me-2 d-flex align-items-center justify-content-center gap-2">
-                <FcGoogle size={20} /> Google
-              </Button>
-              <Button variant="outline-primary" className="w-50 d-flex align-items-center justify-content-center gap-2">
-                <FaLinkedin size={20} /> LinkedIn
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
+        onClose={() => setShowLogin(false)}
+        onLoginSuccess={(loggedInUser) => {
+          setUser(loggedInUser);
+          setRole(loggedInUser.role);
+          localStorage.setItem("user", JSON.stringify(loggedInUser));
+          localStorage.setItem("role", loggedInUser.role);
+        }}
+      />
     </>
   );
 };

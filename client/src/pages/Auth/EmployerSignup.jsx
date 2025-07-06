@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import axios from "axios";
+import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -9,8 +9,8 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import toast from "react-hot-toast";
+import "react-toastify/dist/ReactToastify.css";
 
 const EmployerSignup = () => {
   const navigate = useNavigate();
@@ -24,8 +24,10 @@ const EmployerSignup = () => {
     industry: "",
     location: "",
     description: "",
-    companyLogo: null,
+     companyLogoUrl: null,
   });
+
+
 
   const [showPassword, setShowPassword] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -34,9 +36,9 @@ const EmployerSignup = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (name === "companyLogo") {
+    if (name === "companyLogoUrl") {
       const file = files[0];
-      setFormData((prev) => ({ ...prev, companyLogo: file }));
+      setFormData((prev) => ({ ...prev, companyLogoUrl: file }));
       if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -44,7 +46,7 @@ const EmployerSignup = () => {
         };
         reader.readAsDataURL(file);
       }
-    } else {
+    } else {  
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
@@ -54,40 +56,18 @@ const EmployerSignup = () => {
     setIsSubmitting(true);
 
     try {
-      const {
-        name,
-        email,
-        password,
-        phone,
-        companyName,
-        companySize,
-        industry,
-        location,
-        description,
-      } = formData;
+      const formPayload = new FormData();
+    
 
-      const dataToSend = {
-        name,
-        email,
-        password,
-        phone,
-        companyName,
-        companySize,
-        industry,
-        location,
-        description,
-      };
+     for (const key in formData) {
+      formPayload.append(key, formData[key]);
+    }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/employer/signup`,
-        dataToSend,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post("/employer/signup", formPayload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       setFormData({
         name: "",
@@ -99,26 +79,19 @@ const EmployerSignup = () => {
         industry: "",
         location: "",
         description: "",
-        companyLogo: null,
+        companyLogoUrl: null,
       });
+      
       setLogoPreview(null);
 
-      toast.success(response.data.message || "Registered successfully!");
+      toast.success(response?.data?.message || "Registered successfully!");
 
       setTimeout(() => {
-        navigate("/verify-email", { state: { email } });
+        navigate("/verify-email", { state: { email: formData.email } });
       }, 2000);
     } catch (error) {
       const serverMessage = error.response?.data?.message;
-      console.error("Signup error:", error.response?.data || error.message);
-     toast.success(serverMessage|| "Registeration Failed!");
-
-
-      if (serverMessage === "User already exists") {
-        setTimeout(() => {
-          navigate("/verify-email", { state: { email: formData.email } });
-        }, 500);
-      }
+      console.error("Signup error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -126,7 +99,6 @@ const EmployerSignup = () => {
 
   return (
     <div className="container">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <Form onSubmit={handleSubmit} className="space-y-4">
         <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
           Employer Registration
@@ -140,7 +112,7 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Enter full name"
           margin="normal"
-          color="error" 
+          color="error"
           required
         />
 
@@ -153,7 +125,7 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Enter email"
           margin="normal"
-          color="error" 
+          color="error"
           required
         />
         <TextField
@@ -164,7 +136,7 @@ const EmployerSignup = () => {
           value={formData.password}
           onChange={handleChange}
           margin="normal"
-          color="error" 
+          color="error"
           required
           InputProps={{
             endAdornment: (
@@ -191,8 +163,8 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Enter phone number"
           margin="normal"
-          color="error" 
-           required
+          color="error"
+          required
         />
 
         <TextField
@@ -203,8 +175,8 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Enter company name"
           margin="normal"
-          color="error" 
-           required
+          color="error"
+          required
         />
 
         <FormControl fullWidth margin="normal">
@@ -214,8 +186,8 @@ const EmployerSignup = () => {
             value={formData.companySize}
             onChange={handleChange}
             label="Company Size"
-             required
-             color="error" 
+            required
+            color="error"
             sx={{
               "& .MuiMenuItem-root": {
                 "&:hover": {
@@ -246,8 +218,8 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="e.g. Tech, Finance, Healthcare"
           margin="normal"
-          color="error" 
-           required
+          color="error"
+          required
         />
 
         <TextField
@@ -258,8 +230,8 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Enter location"
           margin="normal"
-           required
-           color="error" 
+          required
+          color="error"
         />
 
         <TextField
@@ -272,17 +244,17 @@ const EmployerSignup = () => {
           onChange={handleChange}
           placeholder="Brief description of your company"
           margin="normal"
-           required
-            color="error" 
+          required
+          color="error"
         />
 
         <Form.Group>
           <Form.Label>Company Logo</Form.Label>
           <Form.Control
             type="file"
-            name="companyLogo"
+            name="companyLogoUrl"
             accept="image/*"
-            color="error" 
+            color="error"
             onChange={handleChange}
           />
           {logoPreview && (

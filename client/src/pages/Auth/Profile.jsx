@@ -8,17 +8,11 @@ const Profile = () => {
   const [role, setRole] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-      
-        setRole(decoded.role);
-      } catch (err) {
-        console.error("Failed to decode token:", err);
-      }
-    }
-  }, []);
+  const storedRole = localStorage.getItem("role");
+  if (storedRole) {
+    setRole(storedRole);
+  }
+}, []);
 
   return (
     <Layout>
