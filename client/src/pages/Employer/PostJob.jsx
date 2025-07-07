@@ -172,18 +172,15 @@ const PostJob = () => {
               </TextField>
 
               <Box mt={3} textAlign="center">
-                {isSubmitting ? <Loading /> : <Button
+                <Button
                   variant="outline-danger"
                   type="submit"
                   className="w-100"
                   disabled={isSubmitting}
                 >
-                  Post Job
-                </Button>}
-                
+                  {isSubmitting ? <Loading /> : "Post Job"}
+                </Button>
               </Box>
-
-              
             </form>
           </Paper>
         </motion.div>

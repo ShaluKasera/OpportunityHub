@@ -131,17 +131,17 @@ const ApplicationsDetail = () => {
             </select>
           </div>
           <div className="mt-4">
-            {loading ? (
-              <Loading color="success" />
-            ) : (
+            
               <button
                 onClick={saveStatusChange}
                 disabled={loading}
                 className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded w-full sm:w-auto"
-              >
-                Save Status
+              >{loading ? (
+              <Loading color="success" />
+            ) : (
+                "Save Status" )}
               </button>
-            )}
+           
           </div>
         </section>
 

@@ -5,7 +5,7 @@ import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/authContext";
 import Loading from "../../components/Loading";
-
+import { Button } from "react-bootstrap";
 const EmailVerification = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
@@ -157,17 +157,15 @@ const EmailVerification = () => {
               />
             ))}
           </div>
-          {isVerifying ? (
-            <Loading color="danger" />
-          ) : (
-            <button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
-              disabled={isVerifying}
-            >
-              Verify Email
-            </button>
-          )}
+
+          <Button
+            variant="outline-danger"
+            type="submit"
+            className="w-100"
+            disabled={isVerifying}
+          >
+            {isVerifying ? <Loading  /> : "Verify Email"}
+          </Button>
 
           <p className="mt-3 text-center text-gray-600 text-sm">
             OTP expires in:{" "}
@@ -175,11 +173,9 @@ const EmailVerification = () => {
           </p>
 
           <div className="mt-4 text-center">
-            {resendOtpLoading ? (
-              <Loading color="danger" />
-            ) : (
-              <button
-                type="button"
+            
+              <Button
+                type="submit"
                 onClick={resendOtpHandler}
                 disabled={resendTimer > 0}
                 className={`px-4 py-2 rounded ${
@@ -191,8 +187,8 @@ const EmailVerification = () => {
                 {resendTimer > 0
                   ? `Resend OTP in ${resendTimer}s`
                   : "Resend OTP"}
-              </button>
-            )}
+              </Button>
+           
           </div>
         </form>
       </div>

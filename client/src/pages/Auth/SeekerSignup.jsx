@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { TextField, InputLabel, Typography, Box } from "@mui/material";
+import { TextField, Typography, Box } from "@mui/material";
+import { BsCloudUpload } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
-import Button from "react-bootstrap/Button";
+import { Form, Button } from "react-bootstrap";
 import toast from "react-hot-toast";
 import axios from "../../api/axios";
 import Loading from "../../components/Loading";
@@ -81,18 +82,15 @@ const SeekerSignup = () => {
       console.log("Signup Error: ", error);
     } finally {
       setIsSubmitting(false);
+      setProfilePreview(null);
     }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{ maxWidth: 500, mx: "auto", p: 3 }}
-    >
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+    <Form className="space-y-4" onSubmit={handleSubmit}>
+      <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
         Job Seeker Registration
-      </Typography>
+      </h2>
 
       <TextField
         fullWidth
@@ -216,17 +214,42 @@ const SeekerSignup = () => {
       />
 
       <Box mt={2}>
-        <InputLabel>Profile Picture</InputLabel>
         <input
+          accept="image/*"
+          id="profilePic"
           type="file"
           name="profilePic"
-          accept="image/*"
-          color="error"
+          style={{ display: "none" }}
           onChange={handleChange}
-          style={{ marginTop: "8px" }}
         />
+
+        <label htmlFor="profilePic">
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            sx={{
+              width: "100%",
+              border: "2px dashed #ccc",
+              borderRadius: "5px",
+              padding: "10px",
+              cursor: "pointer",
+              mt: 1,
+              "&:hover": {
+                borderColor: "red",
+              },
+            }}
+          >
+            <BsCloudUpload className="text-2xl text-gray-400" />
+            <Typography variant="body2" color="textSecondary">
+              Click or drag file to upload Profile pic
+            </Typography>
+          </Box>
+        </label>
+
         {profilePreview && (
-          <Box mt={1}>
+          <Box mt={2}>
             <img
               src={profilePreview}
               alt="Profile Preview"
@@ -235,19 +258,16 @@ const SeekerSignup = () => {
           </Box>
         )}
       </Box>
-      {isSubmitting ? (
-        <Loading />
-      ) : (
-        <Button
-          variant="outline-danger"
-          type="submit"
-          className="!w-full mt-3"
-          disabled={isSubmitting}
-        >
-          Register as Job Seeker
-        </Button>
-      )}
-    </Box>
+
+      <Button
+        variant="outline-danger"
+        type="submit"
+        className="!w-full mt-3"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? <Loading /> : "Register as Job Seeker"}
+      </Button>
+    </Form>
   );
 };
 

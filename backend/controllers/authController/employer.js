@@ -48,8 +48,9 @@ const EmployerSignup = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
+    const existingEmail = await User.findOne({ where: { email } });
+    const existingPhone = await Employer.findOne({ where: { phone } });
+    if (existingPhone || existingEmail) {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });

@@ -142,17 +142,17 @@ const ForgetPassword = () => {
               placeholder="Enter your email"
               required
             />
-            {loading ? (
-              <Loading color="danger" />
-            ) : (
+            
               <button
                 onClick={sendOtp}
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
                 disabled={loading}
               >
-                Send OTP
+                {loading ? (
+              <Loading color="danger" />
+            ) : ("Send OTP" )}
               </button>
-            )}
+           
           </>
         )}
 
@@ -179,17 +179,17 @@ const ForgetPassword = () => {
                 />
               ))}
             </div>
-            {loading ? (
-              <Loading color="danger" />
-            ) : (
+            
               <button
                 onClick={verifyOtp}
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
                 disabled={loading}
-              >
-                Verify OTP
+              >{loading ? (
+              <Loading color="danger" />
+            ) : (
+                "Verify OTP"  )}
               </button>
-            )}
+          
           </>
         )}
 
@@ -235,17 +235,17 @@ const ForgetPassword = () => {
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
-            {loading ? (
-              <Loading color="sucess" />
-            ) : (
+            
               <button
                 onClick={handlePasswordSubmit}
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
                 disabled={loading}
-              >
-                Update Password
+              >{loading ? (
+              <Loading color="sucess" />
+            ) : (
+               " Update Password" )}
               </button>
-            )}
+           
           </>
         )}
 

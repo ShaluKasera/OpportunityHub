@@ -6,7 +6,7 @@ import { FaLinkedin } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import { toast } from "react-hot-toast";
-
+import Loading from "../../components/Loading";
 const Login = ({ show, onClose, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -113,18 +113,18 @@ const Login = ({ show, onClose, onLoginSuccess }) => {
               Forgot Password?
             </Link>
           </div>
-          {loading ? (
-            <Loading color="danger" />
-          ) : (
+          
             <Button
               variant="outline-danger"
               className="w-full mt-4"
               type="submit"
               disabled={loading}
-            >
-              Login
+            >{loading ? (
+            <Loading color="danger" />
+          ) : (
+              "Login"   )}
             </Button>
-          )}
+       
 
           <div className="d-flex align-items-center justify-content-center my-3">
             <span className="border-bottom w-100"></span>

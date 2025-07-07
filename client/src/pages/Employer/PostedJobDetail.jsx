@@ -162,17 +162,17 @@ const PostedJobDetail = () => {
               <strong>Description:</strong> {job.description}
             </p>
 
-            {sending ? (
-              <Loading  />
-            ) : (
+            
               <button
                 onClick={handleSendOffers}
                 disabled={sending}
                 className="mt-6 text-red  hover:bg-red-700 border-2 border-red-700 hover:text-white px-4 py-2 rounded transition-all duration-300 "
-              >
-                Send Offer to Relevant Seekers
+              >{sending ? (
+              <Loading  />
+            ) : (
+                "Send Offer to Relevant Seekers"  )}
               </button>
-            )}
+          
           </>
         ) : (
           <form onSubmit={handleJobUpdate} className="space-y-4">

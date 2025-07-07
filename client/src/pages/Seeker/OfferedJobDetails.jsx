@@ -174,28 +174,28 @@ const OfferedJobDetails = () => {
         {/* Action Buttons */}
         {status === "sent" && (
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-6">
-            {responseLoading ? (
-              <Loading color="success" />
-            ) : (
+            
               <Button
                 variant="outline-success"
                 className="w-full sm:w-auto"
                 onClick={() => handleResponse("accepted")}
-              >
-                Accept Offer
-              </Button>
-            )}
-            {responseLoading ? (
-              <Loading />
+              >{responseLoading ? (
+              <Loading color="success" />
             ) : (
+                "Accept Offer"  )}
+              </Button>
+          
+            
               <Button
                 variant="outline-danger"
                 className="w-full sm:w-auto"
                 onClick={() => handleResponse("rejected")}
-              >
-                Reject Offer
+              >{responseLoading ? (
+              <Loading />
+            ) : (
+               " Reject Offer" )}
               </Button>
-            )}
+           
           </div>
         )}
       </div>

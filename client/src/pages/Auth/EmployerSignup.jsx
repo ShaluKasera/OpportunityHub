@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import { BsCloudUpload } from "react-icons/bs";
 import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import {
+  Typography,
+  Box,
   TextField,
   MenuItem,
   Select,
@@ -96,189 +99,210 @@ const EmployerSignup = () => {
   };
 
   return (
-    <div className="container">
-      <Form onSubmit={handleSubmit} className="space-y-4">
-        <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
-          Employer Registration
-        </h2>
+    <Form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-3xl !font-bold mb-4 Ysabeau_Infant">
+        Employer Registration
+      </h2>
 
-        <TextField
-          fullWidth
-          label="Full Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Enter full name"
-          margin="normal"
-          color="error"
-          required
-        />
+      <TextField
+        fullWidth
+        label="Full Name"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        placeholder="Enter full name"
+        margin="normal"
+        color="error"
+        required
+      />
 
-        <TextField
-          fullWidth
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
+      <TextField
+        fullWidth
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="Enter email"
+        margin="normal"
+        color="error"
+        required
+      />
+      <TextField
+        fullWidth
+        label="Password"
+        type={showPassword ? "text" : "password"}
+        name="password"
+        value={formData.password}
+        onChange={handleChange}
+        margin="normal"
+        color="error"
+        required
+        InputProps={{
+          endAdornment: (
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                cursor: "pointer",
+                color: "red",
+                fontSize: "0.9em",
+              }}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </span>
+          ),
+        }}
+      />
+
+      <TextField
+        fullWidth
+        label="Phone"
+        name="phone"
+        type="tel"
+        value={formData.phone}
+        onChange={handleChange}
+        placeholder="Enter phone number"
+        margin="normal"
+        color="error"
+        required
+      />
+
+      <TextField
+        fullWidth
+        label="Company Name"
+        name="companyName"
+        value={formData.companyName}
+        onChange={handleChange}
+        placeholder="Enter company name"
+        margin="normal"
+        color="error"
+        required
+      />
+
+      <FormControl fullWidth margin="normal">
+        <InputLabel color="error">Company Size</InputLabel>
+        <Select
+          name="companySize"
+          value={formData.companySize}
           onChange={handleChange}
-          placeholder="Enter email"
-          margin="normal"
-          color="error"
+          label="Company Size"
           required
-        />
-        <TextField
-          fullWidth
-          label="Password"
-          type={showPassword ? "text" : "password"}
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          margin="normal"
           color="error"
-          required
-          InputProps={{
-            endAdornment: (
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  cursor: "pointer",
-                  color: "red",
-                  fontSize: "0.9em",
-                }}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </span>
-            ),
+          sx={{
+            "& .MuiMenuItem-root": {
+              "&:hover": {
+                backgroundColor: "red",
+                color: "white",
+              },
+              "&.Mui-selected": {
+                backgroundColor: "red",
+                color: "white",
+              },
+            },
           }}
-        />
+        >
+          <MenuItem value="">Select company size</MenuItem>
+          <MenuItem value="1-10">1-10</MenuItem>
+          <MenuItem value="11-50">11-50</MenuItem>
+          <MenuItem value="51-200">51-200</MenuItem>
+          <MenuItem value="201-500">201-500</MenuItem>
+          <MenuItem value="500+">500+</MenuItem>
+        </Select>
+      </FormControl>
 
-        <TextField
-          fullWidth
-          label="Phone"
-          name="phone"
-          type="tel"
-          value={formData.phone}
+      <TextField
+        fullWidth
+        label="Industry"
+        name="industry"
+        value={formData.industry}
+        onChange={handleChange}
+        placeholder="e.g. Tech, Finance, Healthcare"
+        margin="normal"
+        color="error"
+        required
+      />
+
+      <TextField
+        fullWidth
+        label="Location"
+        name="location"
+        value={formData.location}
+        onChange={handleChange}
+        placeholder="Enter location"
+        margin="normal"
+        required
+        color="error"
+      />
+
+      <TextField
+        fullWidth
+        label="Company Description"
+        name="description"
+        multiline
+        rows={3}
+        value={formData.description}
+        onChange={handleChange}
+        placeholder="Brief description of your company"
+        margin="normal"
+        required
+        color="error"
+      />
+
+      <Box mt={2}>
+        <input
+          accept="image/*"
+          id="companyLogoUrl"
+          type="file"
+          name="companyLogoUrl"
+          style={{ display: "none" }}
           onChange={handleChange}
-          placeholder="Enter phone number"
-          margin="normal"
-          color="error"
-          required
         />
 
-        <TextField
-          fullWidth
-          label="Company Name"
-          name="companyName"
-          value={formData.companyName}
-          onChange={handleChange}
-          placeholder="Enter company name"
-          margin="normal"
-          color="error"
-          required
-        />
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel color="error">Company Size</InputLabel>
-          <Select
-            name="companySize"
-            value={formData.companySize}
-            onChange={handleChange}
-            label="Company Size"
-            required
-            color="error"
+        <label htmlFor="companyLogoUrl">
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
             sx={{
-              "& .MuiMenuItem-root": {
-                "&:hover": {
-                  backgroundColor: "red",
-                  color: "white",
-                },
-                "&.Mui-selected": {
-                  backgroundColor: "red",
-                  color: "white",
-                },
+              width: "100%",
+              border: "2px dashed #ccc",
+              borderRadius: "5px",
+              padding: "10px",
+              cursor: "pointer",
+              mt: 1,
+              "&:hover": {
+                borderColor: "red",
               },
             }}
           >
-            <MenuItem value="">Select company size</MenuItem>
-            <MenuItem value="1-10">1-10</MenuItem>
-            <MenuItem value="11-50">11-50</MenuItem>
-            <MenuItem value="51-200">51-200</MenuItem>
-            <MenuItem value="201-500">201-500</MenuItem>
-            <MenuItem value="500+">500+</MenuItem>
-          </Select>
-        </FormControl>
+            <BsCloudUpload className="text-2xl text-gray-400" />
+            <Typography variant="body2" color="textSecondary">
+              Click or drag file to upload Company Logo
+            </Typography>
+          </Box>
+        </label>
 
-        <TextField
-          fullWidth
-          label="Industry"
-          name="industry"
-          value={formData.industry}
-          onChange={handleChange}
-          placeholder="e.g. Tech, Finance, Healthcare"
-          margin="normal"
-          color="error"
-          required
-        />
-
-        <TextField
-          fullWidth
-          label="Location"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          placeholder="Enter location"
-          margin="normal"
-          required
-          color="error"
-        />
-
-        <TextField
-          fullWidth
-          label="Company Description"
-          name="description"
-          multiline
-          rows={3}
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Brief description of your company"
-          margin="normal"
-          required
-          color="error"
-        />
-
-        <Form.Group>
-          <Form.Label>Company Logo</Form.Label>
-          <Form.Control
-            type="file"
-            name="companyLogoUrl"
-            accept="image/*"
-            color="error"
-            onChange={handleChange}
-          />
-          {logoPreview && (
-            <div className="mt-2">
-              <img
-                src={logoPreview}
-                alt="Company Logo Preview"
-                className="h-20 object-contain"
-              />
-            </div>
-          )}
-        </Form.Group>
-        {isSubmitting ? (
-          <Loading color="danger" />
-        ) : (
-          <Button
-            variant="outline-danger"
-            type="submit"
-            className="w-full mt-3"
-            disabled={isSubmitting}
-          >
-            Register as Employer
-          </Button>
+        {logoPreview && (
+          <Box mt={2}>
+            <img
+              src={logoPreview}
+              alt="Company Logo Preview"
+              style={{ height: 80, objectFit: "contain" }}
+            />
+          </Box>
         )}
-      </Form>
-    </div>
+      </Box>
+
+      <Button
+        variant="outline-danger"
+        type="submit"
+        className="w-full mt-3"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? <Loading color="danger" /> : "Register as Employer"}
+      </Button>
+    </Form>
   );
 };
 
