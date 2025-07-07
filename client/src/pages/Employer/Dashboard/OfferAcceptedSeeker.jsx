@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../../api/axios";
 import { format } from "date-fns";
 import {
   Card,
@@ -33,15 +33,7 @@ const OfferAcceptedSeeker = () => {
   useEffect(() => {
     const fetchSeekers = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/employer/accepted-seekers`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get("/employer/accepted-seekers");
         setOffers(res.data.acceptedJobSeekers || []);
       } catch (err) {
         console.error("Failed to fetch offered seekers:", err);
@@ -57,7 +49,7 @@ const OfferAcceptedSeeker = () => {
         All Seekers Who Accept the offer
       </p>
       <div className="h-[1px] mt-4 mb-4 bg-red-700" />
-{offers.length === 0 ? (
+      {offers.length === 0 ? (
         <Typography
           variant="h6"
           color="text.secondary"
@@ -66,73 +58,73 @@ const OfferAcceptedSeeker = () => {
           No Accepted Seeker found.
         </Typography>
       ) : (
-      <Box
-        sx={{
-          overflowX: "auto",
-          display: "flex",
-          gap: 2,
-          paddingBottom: 2,
-        }}
-      >
-        {offers.map((offer, index) => (
-          <Card
-            key={index}
-            sx={{
-              minWidth: 300,
-              flex: "0 0 auto",
-            }}
-            elevation={3}
-          >
-            <CardContent>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Avatar
-                  src="https://randomuser.me/api/portraits/lego/3.jpg"
-                  alt="Seeker"
-                  sx={{ width: 48, height: 48 }}
-                />
-                <Typography variant="body2" color="text.secondary">
-                  {format(new Date(offer.acceptedAt), "dd MMM yyyy")}
+        <Box
+          sx={{
+            overflowX: "auto",
+            display: "flex",
+            gap: 2,
+            paddingBottom: 2,
+          }}
+        >
+          {offers.map((offer, index) => (
+            <Card
+              key={index}
+              sx={{
+                minWidth: 300,
+                flex: "0 0 auto",
+              }}
+              elevation={3}
+            >
+              <CardContent>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Avatar
+                    src="https://randomuser.me/api/portraits/lego/3.jpg"
+                    alt="Seeker"
+                    sx={{ width: 48, height: 48 }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {format(new Date(offer.acceptedAt), "dd MMM yyyy")}
+                  </Typography>
+                </Box>
+
+                <Typography variant="h6" mt={2} fontWeight="bold" color="error">
+                  {offer.jobTitle}
                 </Typography>
-              </Box>
 
-              <Typography variant="h6" mt={2} fontWeight="bold" color="error">
-                {offer.jobTitle}
-              </Typography>
+                <Typography variant="subtitle1" mt={1}>
+                  {offer.jobSeeker.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {offer.jobSeeker.email}
+                </Typography>
 
-              <Typography variant="subtitle1" mt={1}>
-                {offer.jobSeeker.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {offer.jobSeeker.email}
-              </Typography>
+                <Typography variant="body2" mt={1}>
+                  <strong>Domain:</strong> {offer.jobSeeker.domain}
+                </Typography>
 
-              <Typography variant="body2" mt={1}>
-                <strong>Domain:</strong> {offer.jobSeeker.domain}
-              </Typography>
+                <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
+                  {offer.jobSeeker.skills?.map((skill, i) => (
+                    <Chip label={skill} key={i} variant="outlined" />
+                  ))}
+                </Box>
 
-              <Box mt={1} display="flex" flexWrap="wrap" gap={1}>
-                {offer.jobSeeker.skills?.map((skill, i) => (
-                  <Chip label={skill} key={i} variant="outlined" />
-                ))}
-               
-              </Box>
-
-              <Button
-                variant="outline-danger"
-                sx={{ mt: 2, fontWeight: "bold", textTransform: "none" }}
-                onClick={() => setSelected(offer)}
-                className="w-full mt-2"
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>)}
+                <Button
+                  variant="outline-danger"
+                  sx={{ mt: 2, fontWeight: "bold", textTransform: "none" }}
+                  onClick={() => setSelected(offer)}
+                  className="w-full mt-2"
+                >
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      )}
 
       {/* Modal for detailed view */}
       <Modal open={Boolean(selected)} onClose={() => setSelected(null)}>
@@ -157,7 +149,7 @@ const OfferAcceptedSeeker = () => {
           <Typography variant="body1" gutterBottom>
             <strong>Domain:</strong> {selected?.jobSeeker?.domain}
           </Typography>
-          
+
           <Typography variant="body1" gutterBottom>
             <strong>Skills:</strong>{" "}
             {selected?.jobSeeker?.skills?.join(", ") || "No skills listed"}

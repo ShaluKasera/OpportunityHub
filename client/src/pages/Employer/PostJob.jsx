@@ -11,12 +11,12 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import axios from "axios";
+import axios from "../../api/axios";
 import { Button } from "react-bootstrap";
 import Layout from "../../components/Layout/Layout";
-import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import toast from "react-hot-toast";
 const PostJob = () => {
+  const pathname = window.location.pathname;
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -55,18 +55,7 @@ const PostJob = () => {
           .filter((s) => s !== ""),
       };
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/employer/post-job`,
-        dataToSend,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      
+      const response = await axios.post(`/employer/post-job`, dataToSend);
 
       setFormData({
         title: "",
@@ -83,11 +72,11 @@ const PostJob = () => {
 
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
-      toast.success(response.data.message);
+      toast.success(response.data.message, {
+        id: `err-error-${pathname}`,
+      });
     } catch (error) {
-      const serverMessage = error.response?.data?.message;
       console.error("Post job error:", error.response?.data || error.message);
-      toast.error(serverMessage || "There was an error posting the job");
     } finally {
       setIsSubmitting(false);
     }
@@ -95,7 +84,6 @@ const PostJob = () => {
 
   return (
     <Layout>
-       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <Box
         display="flex"
         flexDirection="column"
@@ -112,16 +100,25 @@ const PostJob = () => {
           style={{ width: "100%", maxWidth: 600 }}
         >
           <Paper elevation={3} sx={{ padding: 4, borderRadius: 3 }}>
-            <Typography variant="h4" fontWeight="bold" textAlign="center" mb={3}>
+            <Typography
+              variant="h4"
+              fontWeight="bold"
+              textAlign="center"
+              mb={3}
+            >
               Post a New Job
             </Typography>
             <form onSubmit={handleSubmit}>
               {[
                 { name: "title", label: "Job Title" },
-                { name: "description", label: "Job Description", multiline: true },
+                {
+                  name: "description",
+                  label: "Job Description",
+                  multiline: true,
+                },
                 { name: "openings", label: "Openings", type: "number" },
                 { name: "location", label: "Location" },
-                { name: "salary", label: "Salary (e.g. $100/month)" },
+                { name: "salary", label: "Salary (e.g. 100/month)" },
                 { name: "domain", label: "Domain (e.g. Web Dev)" },
                 { name: "experienceRequired", label: "Experience Required" },
                 { name: "deadline", label: "Deadline", type: "date" },
@@ -139,7 +136,17 @@ const PostJob = () => {
                   rows={field.multiline ? 3 : 1}
                   margin="normal"
                   color="error"
-                  required={["title", "description", "domain","openings","location","salary","domain","experienceRequired","skills"].includes(field.name)}
+                  required={[
+                    "title",
+                    "description",
+                    "domain",
+                    "openings",
+                    "location",
+                    "salary",
+                    "domain",
+                    "experienceRequired",
+                    "skills",
+                  ].includes(field.name)}
                   InputLabelProps={
                     field.type === "date" ? { shrink: true } : undefined
                   }
@@ -155,7 +162,7 @@ const PostJob = () => {
                 onChange={handleChange}
                 margin="normal"
                 color="error"
-                requ
+                required
               >
                 <MenuItem value="full-time">Full-time</MenuItem>
                 <MenuItem value="part-time">Part-time</MenuItem>
@@ -174,7 +181,7 @@ const PostJob = () => {
                 </Button>
               </Box>
 
-              <Fade in={submitted}>
+              {/* <Fade in={submitted}>
                 <Typography
                   mt={2}
                   variant="body1"
@@ -183,7 +190,7 @@ const PostJob = () => {
                 >
                   Job posted successfully!
                 </Typography>
-              </Fade>
+              </Fade> */}
             </form>
           </Paper>
         </motion.div>

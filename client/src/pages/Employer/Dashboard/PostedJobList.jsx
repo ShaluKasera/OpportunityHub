@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../../api/axios";
 import Cards from "./Cards";
 import { Box, Typography } from "@mui/material";
 
@@ -9,15 +9,7 @@ const PostedJobList = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/employer/posted-joblist`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get('/employer/posted-joblist');
         setJobs(res.data.jobs || []);
       } catch (err) {
         console.error("Error fetching jobs:", err);

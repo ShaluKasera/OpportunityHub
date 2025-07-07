@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import  toast from "react-hot-toast"
 
 const ApplicationsDetail = () => {
   const { state: application } = useLocation();
@@ -37,19 +36,10 @@ const ApplicationsDetail = () => {
   const saveStatusChange = async () => {
     try {
       setLoading(true);
-      await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/employer/update-application-status/${applicationId}`,
-        { status },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast.success(`Application status updated to "${status}"`);
+      await axios.put(`/employer/update-application-status/${applicationId}`);
+       const pathname = window.location.pathname;
+      toast.success(`Application status updated to "${status}"`,{id:`err-error-${pathname}`});
     } catch (error) {
-      toast.error("Failed to update status");
       console.error("Status update error:", error);
     } finally {
       setLoading(false);
@@ -58,7 +48,7 @@ const ApplicationsDetail = () => {
 
   return (
     <Layout>
-      <ToastContainer position="top-right" autoClose={3000} />
+     
       <div className="container mx-auto px-4 sm:px-6 py-10 space-y-10 max-w-4xl">
         {/* Applicant Info */}
         <section>

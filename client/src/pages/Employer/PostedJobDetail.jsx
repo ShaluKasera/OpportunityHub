@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast from "react-hot-toast";
 const formatDate = (isoDate) => {
   if (!isoDate) return "Not available";
   const date = new Date(isoDate);
@@ -11,6 +10,7 @@ const formatDate = (isoDate) => {
 };
 
 const PostedJobDetail = () => {
+   const pathname = window.location.pathname;
   const { jobId } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
@@ -22,15 +22,11 @@ const PostedJobDetail = () => {
   const fetchJobDetail = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/employer/posted-joblist/${jobId}`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`/employer/posted-joblist/${jobId}`);
       setJob(res.data.job);
       setFormData(res.data.job);
     } catch (err) {
       console.error("Failed to fetch job detail:", err);
-      showToast("error", "Failed to load job details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -58,40 +54,38 @@ const PostedJobDetail = () => {
     setUpdating(true);
 
     try {
-      await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/employer/update-job/${jobId}`,
-        formData,
-        { withCredentials: true }
-      );
-
-      toast.success("Job updated successfully!");
+      await axios.put(`/employer/update-job/${jobId}`);
+     
+      toast.success("Job updated successfully!", {
+        id: `err-error-${pathname}`,
+      });
       setTimeout(() => {
         setEditMode(false);
-
         fetchJobDetail();
       }, 3000);
     } catch (err) {
       console.error("Failed to update job:", err);
-      toast.error("Failed to update job. Please try again");
     } finally {
       setUpdating(false);
     }
   };
   const handleSendOffers = async () => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/employer/send-jobOffer`,
-        { jobId: Number(jobId) },
-        { withCredentials: true }
-      );
-      toast.success(res.data.message || "Offers sent successfully!");
+      const res = await axios.post(`/employer/send-jobOffer`, {
+        jobId: Number(jobId),
+      });
+     
+      toast.success(res.data.message || "Offers sent successfully!", {
+        id: `err-error-${pathname}`,
+      });
     } catch (err) {
       const message = err.response?.data?.message || "Unknown error";
       if (message === "Job openings already filled.") {
-        toast.info("You cannot send more offers. All openings are filled.");
+        toast.info("You cannot send more offers. All openings are filled.", {
+        id: `err-error-${pathname}`,
+      });
       } else {
         console.error("Failed to send offers:", err);
-        toast.error("Error sending offers: " + message);
       }
     }
   };
@@ -118,7 +112,7 @@ const PostedJobDetail = () => {
 
   return (
     <Layout>
-      <ToastContainer position="top-right" autoClose={3000} />
+
       <div className="container max-w-4xl mx-auto py-10 px-6 space-y-10">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold border-b border-red-700 pb-2">

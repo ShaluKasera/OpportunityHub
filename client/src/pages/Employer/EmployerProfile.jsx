@@ -27,8 +27,6 @@ const EmployerProfile = () => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get("/employer/profile");
-       
-
         const data = res.data.profile;
         const userData = data.user || {};
         

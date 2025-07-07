@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../../api/axios";
 import { format } from "date-fns";
 import {
   Card,
@@ -33,15 +33,7 @@ const OfferedSeeker = () => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/employer/list-offered-seeker`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get("/employer/list-offered-seeker");
         setOffers(res.data.offers || []);
       } catch (err) {
         console.error("Failed to fetch offered seekers:", err);
