@@ -4,6 +4,7 @@ import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
+import Loading from "../../components/Loading";
 
 const Detail = () => {
   const { id } = useParams();
@@ -17,7 +18,7 @@ const Detail = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const storedRole = localStorage.getItem("role"); 
+    const storedRole = localStorage.getItem("role");
     if (storedUser && storedRole) {
       setUserRole(storedRole);
     }
@@ -90,19 +91,19 @@ const Detail = () => {
             </div>
           </div>
 
-          {isLoggedIn && userRole === "job_seeker" && (
-            <button
-              onClick={handleApply}
-              disabled={applying}
-              className={`px-6 py-2 ${
-                applying
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-red-700 hover:bg-white hover:text-red-700"
-              } text-white !rounded-3xl border-2 hover:!text-red-700 border-red-700 hover:border-red-700 duration-300`}
-            >
-              {applying ? "Applying..." : "Apply Now"}
-            </button>
-          )}
+          {isLoggedIn &&
+            userRole === "job_seeker" &&
+            (applying ? (
+              <Loading color="danger" />
+            ) : (
+              <button
+                onClick={handleApply}
+                disabled={applying}
+                className="px-6 py-2 bg-red-700 hover:bg-white text-white rounded-3xl border-2 hover:text-red-700 border-red-700 hover:border-red-700 duration-300"
+              >
+                Apply Now
+              </button>
+            ))}
         </div>
 
         {/* Job Details */}

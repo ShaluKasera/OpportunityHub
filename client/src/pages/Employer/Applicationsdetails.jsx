@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
-import  toast from "react-hot-toast"
+import toast from "react-hot-toast";
+import Loading from "../../components/Loading";
 
 const ApplicationsDetail = () => {
   const { state: application } = useLocation();
@@ -36,9 +37,13 @@ const ApplicationsDetail = () => {
   const saveStatusChange = async () => {
     try {
       setLoading(true);
-      await axios.put(`/employer/update-application-status/${applicationId}`,{ status });
-       const pathname = window.location.pathname;
-      toast.success(`Application status updated to "${status}"`,{id:`err-error-${pathname}`});
+      await axios.put(`/employer/update-application-status/${applicationId}`, {
+        status,
+      });
+      const pathname = window.location.pathname;
+      toast.success(`Application status updated to "${status}"`, {
+        id: `err-error-${pathname}`,
+      });
     } catch (error) {
       console.error("Status update error:", error);
     } finally {
@@ -48,7 +53,6 @@ const ApplicationsDetail = () => {
 
   return (
     <Layout>
-     
       <div className="container mx-auto px-4 sm:px-6 py-10 space-y-10 max-w-4xl">
         {/* Applicant Info */}
         <section>
@@ -127,13 +131,17 @@ const ApplicationsDetail = () => {
             </select>
           </div>
           <div className="mt-4">
-            <button
-              onClick={saveStatusChange}
-              disabled={loading}
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded w-full sm:w-auto"
-            >
-              {loading ? "Updating..." : "Save Status"}
-            </button>
+            {loading ? (
+              <Loading color="success" />
+            ) : (
+              <button
+                onClick={saveStatusChange}
+                disabled={loading}
+                className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded w-full sm:w-auto"
+              >
+                Save Status
+              </button>
+            )}
           </div>
         </section>
 

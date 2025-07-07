@@ -4,13 +4,14 @@ import toast from "react-hot-toast";
 import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/authContext";
+import Loading from "../../components/Loading";
 
 const EmailVerification = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpExpiresIn, setOtpExpiresIn] = useState(600);
-  const [resendTimer, setResendTimer] = useState(0); 
-
+  const [resendTimer, setResendTimer] = useState(0);
+  const [resendOtpLoading, setResendOtpLoading] = useState(false);
   const { setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,6 +109,7 @@ const EmailVerification = () => {
 
   const resendOtpHandler = async () => {
     if (resendTimer > 0) return;
+    setResendOtpLoading(true);
 
     try {
       setResendTimer(30);
@@ -118,7 +120,9 @@ const EmailVerification = () => {
 
       toast.success(response.data.message);
     } catch (error) {
-      // handled by global interceptor
+      console.log("Resend otp error: ", error);
+    } finally {
+      setResendOtpLoading(false);
     }
   };
 
@@ -153,14 +157,17 @@ const EmailVerification = () => {
               />
             ))}
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
-            disabled={isVerifying}
-          >
-            {isVerifying ? "Verifying..." : "Verify Email"}
-          </button>
+          {isVerifying ? (
+            <Loading color="danger" />
+          ) : (
+            <button
+              type="submit"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+              disabled={isVerifying}
+            >
+              Verify Email
+            </button>
+          )}
 
           <p className="mt-3 text-center text-gray-600 text-sm">
             OTP expires in:{" "}
@@ -168,18 +175,24 @@ const EmailVerification = () => {
           </p>
 
           <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={resendOtpHandler}
-              disabled={resendTimer > 0}
-              className={`px-4 py-2 rounded ${
-                resendTimer > 0
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-red-600 hover:bg-red-700 text-white"
-              }`}
-            >
-              {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
-            </button>
+            {resendOtpLoading ? (
+              <Loading color="danger" />
+            ) : (
+              <button
+                type="button"
+                onClick={resendOtpHandler}
+                disabled={resendTimer > 0}
+                className={`px-4 py-2 rounded ${
+                  resendTimer > 0
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
+              >
+                {resendTimer > 0
+                  ? `Resend OTP in ${resendTimer}s`
+                  : "Resend OTP"}
+              </button>
+            )}
           </div>
         </form>
       </div>

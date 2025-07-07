@@ -11,7 +11,7 @@ const JobSeeker = sequelize.define("job_seeker", {
   profilePicUrl: {
     type: DataTypes.STRING,
     allowNull: true,
-    comment: "Cloudinary URL for the profile picture",
+ 
   },
 
   userId: {
@@ -27,17 +27,17 @@ const JobSeeker = sequelize.define("job_seeker", {
   domain: {
     type: DataTypes.STRING,
     allowNull: true,
-    comment: "Job seeker’s professional domain or industry",
+   
   },
   location: {
     type: DataTypes.STRING,
     allowNull: true,
-    comment: "Preferred work location or current location",
+   
   },
   experienceYears: {
     type: DataTypes.FLOAT,
     allowNull: true,
-    comment: "Years of professional experience",
+ 
   },
 
   phone: {
@@ -53,7 +53,7 @@ const JobSeeker = sequelize.define("job_seeker", {
   resumeUrl: {
     type: DataTypes.STRING,
     allowNull: true,
-    comment: "Link to uploaded resume or portfolio",
+
   },
   availabilityStatus: {
     type: DataTypes.ENUM("available", "not_available", "employed"),

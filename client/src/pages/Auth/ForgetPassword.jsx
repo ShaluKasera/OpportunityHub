@@ -3,7 +3,8 @@ import axios from "axios";
 import Layout from "../../components/Layout/Layout";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+import Loading from "../../components/Loading";
 const ForgetPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -47,10 +48,13 @@ const ForgetPassword = () => {
   const sendOtp = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/forgot-password`, {
-        email,
-        name: email.split("@")[0], 
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/user/forgot-password`,
+        {
+          email,
+          name: email.split("@")[0],
+        }
+      );
       toast.success(response.data.message);
       setStep(2);
     } catch (error) {
@@ -60,28 +64,30 @@ const ForgetPassword = () => {
     }
   };
 
-const verifyOtp = async () => {
-  const enteredOtp = otp.join("");
-  if (enteredOtp.length !== 6) {
-    toast.error("Please enter a valid 6-digit OTP");
-    return;
-  }
+  const verifyOtp = async () => {
+    const enteredOtp = otp.join("");
+    if (enteredOtp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
 
-  try {
-    setLoading(true);
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/verify-otp`, {
-      email,
-      otp: enteredOtp,
-    });
-    toast.success(response.data.message);
-    setStep(3);
-  } catch (error) {
-    toast.error(error.response?.data?.message || "OTP verification failed");
-  } finally {
-    setLoading(false);
-  }
-};
-
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/user/verify-otp`,
+        {
+          email,
+          otp: enteredOtp,
+        }
+      );
+      toast.success(response.data.message);
+      setStep(3);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "OTP verification failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePasswordSubmit = async () => {
     const enteredOtp = otp.join("");
@@ -98,11 +104,14 @@ const verifyOtp = async () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/reset-password`, {
-        email,
-        otp: enteredOtp,
-        newPassword: passwords.newPass,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/user/reset-password`,
+        {
+          email,
+          otp: enteredOtp,
+          newPassword: passwords.newPass,
+        }
+      );
 
       toast.success(response.data.message);
       setStep(4);
@@ -115,7 +124,7 @@ const verifyOtp = async () => {
 
   return (
     <Layout>
-        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="mx-auto w-[80%] md:w-[60%] lg:w-[30%] mt-20 border p-8 rounded shadow-lg bg-white">
         {step === 1 && (
           <>
@@ -133,13 +142,17 @@ const verifyOtp = async () => {
               placeholder="Enter your email"
               required
             />
-            <button
-              onClick={sendOtp}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
-              disabled={loading}
-            >
-              {loading ? "Sending..." : "Send OTP"}
-            </button>
+            {loading ? (
+              <Loading color="danger" />
+            ) : (
+              <button
+                onClick={sendOtp}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+                disabled={loading}
+              >
+                Send OTP
+              </button>
+            )}
           </>
         )}
 
@@ -166,13 +179,17 @@ const verifyOtp = async () => {
                 />
               ))}
             </div>
-            <button
-              onClick={verifyOtp}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
-              disabled={loading}
-            >
-              Verify OTP
-            </button>
+            {loading ? (
+              <Loading color="danger" />
+            ) : (
+              <button
+                onClick={verifyOtp}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+                disabled={loading}
+              >
+                Verify OTP
+              </button>
+            )}
           </>
         )}
 
@@ -218,14 +235,17 @@ const verifyOtp = async () => {
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
-
-            <button
-              onClick={handlePasswordSubmit}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Update Password"}
-            </button>
+            {loading ? (
+              <Loading color="sucess" />
+            ) : (
+              <button
+                onClick={handlePasswordSubmit}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+                disabled={loading}
+              >
+                Update Password
+              </button>
+            )}
           </>
         )}
 

@@ -24,7 +24,7 @@ const Employer = sequelize.define("employer", {
    companyLogoUrl: {
     type: DataTypes.STRING,
     allowNull: true,
-    comment: "Cloudinary URL for the comapany logo",
+   
   },
   companySize: {
     type: DataTypes.ENUM("1-10", "11-50", "51-200", "201-500", "500+"),

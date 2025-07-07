@@ -113,15 +113,18 @@ const Login = ({ show, onClose, onLoginSuccess }) => {
               Forgot Password?
             </Link>
           </div>
-
-          <Button
-            variant="outline-danger"
-            className="w-full mt-4"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </Button>
+          {loading ? (
+            <Loading color="danger" />
+          ) : (
+            <Button
+              variant="outline-danger"
+              className="w-full mt-4"
+              type="submit"
+              disabled={loading}
+            >
+              Login
+            </Button>
+          )}
 
           <div className="d-flex align-items-center justify-content-center my-3">
             <span className="border-bottom w-100"></span>

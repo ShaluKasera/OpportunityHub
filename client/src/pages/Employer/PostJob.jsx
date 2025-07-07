@@ -15,6 +15,7 @@ import axios from "../../api/axios";
 import { Button } from "react-bootstrap";
 import Layout from "../../components/Layout/Layout";
 import toast from "react-hot-toast";
+import Loading from "../../components/Loading";
 const PostJob = () => {
   const pathname = window.location.pathname;
   const [formData, setFormData] = useState({
@@ -171,26 +172,18 @@ const PostJob = () => {
               </TextField>
 
               <Box mt={3} textAlign="center">
-                <Button
+                {isSubmitting ? <Loading /> : <Button
                   variant="outline-danger"
                   type="submit"
                   className="w-100"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? <CircularProgress size={24} /> : "Post Job"}
-                </Button>
+                  Post Job
+                </Button>}
+                
               </Box>
 
-              {/* <Fade in={submitted}>
-                <Typography
-                  mt={2}
-                  variant="body1"
-                  align="center"
-                  color="success.main"
-                >
-                  Job posted successfully!
-                </Typography>
-              </Fade> */}
+              
             </form>
           </Paper>
         </motion.div>

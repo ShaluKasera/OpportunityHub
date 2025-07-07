@@ -1,14 +1,10 @@
 import React, { useState } from "react";
-import {
-  TextField,
-  InputLabel,
-  Typography,
-  Box,
-} from "@mui/material";
+import { TextField, InputLabel, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import toast from "react-hot-toast";
-import axios from "../../api/axios"; 
+import axios from "../../api/axios";
+import Loading from "../../components/Loading";
 
 const SeekerSignup = () => {
   const navigate = useNavigate();
@@ -51,12 +47,11 @@ const SeekerSignup = () => {
     setIsSubmitting(true);
 
     try {
-       const formPayload = new FormData();
-    
+      const formPayload = new FormData();
 
-     for (const key in formData) {
-      formPayload.append(key, formData[key]);
-    }
+      for (const key in formData) {
+        formPayload.append(key, formData[key]);
+      }
       const response = await axios.post("/seeker/signup", formPayload, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -83,8 +78,7 @@ const SeekerSignup = () => {
         navigate("/verify-email", { state: { email: formData.email } });
       }, 1500);
     } catch (error) {
-      console.log("Signup Error: ",error)
-
+      console.log("Signup Error: ", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -241,15 +235,18 @@ const SeekerSignup = () => {
           </Box>
         )}
       </Box>
-
-      <Button
-        variant="outline-danger"
-        type="submit"
-        className="!w-full mt-3"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Registering..." : "Register as Job Seeker"}
-      </Button>
+      {isSubmitting ? (
+        <Loading />
+      ) : (
+        <Button
+          variant="outline-danger"
+          type="submit"
+          className="!w-full mt-3"
+          disabled={isSubmitting}
+        >
+          Register as Job Seeker
+        </Button>
+      )}
     </Box>
   );
 };

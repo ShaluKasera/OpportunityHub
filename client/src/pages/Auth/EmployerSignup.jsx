@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
+import Loading from "../../components/Loading";
 
 const EmployerSignup = () => {
   const navigate = useNavigate();
@@ -24,10 +25,8 @@ const EmployerSignup = () => {
     industry: "",
     location: "",
     description: "",
-     companyLogoUrl: null,
+    companyLogoUrl: null,
   });
-
-
 
   const [showPassword, setShowPassword] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -46,7 +45,7 @@ const EmployerSignup = () => {
         };
         reader.readAsDataURL(file);
       }
-    } else {  
+    } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
@@ -57,11 +56,10 @@ const EmployerSignup = () => {
 
     try {
       const formPayload = new FormData();
-    
 
-     for (const key in formData) {
-      formPayload.append(key, formData[key]);
-    }
+      for (const key in formData) {
+        formPayload.append(key, formData[key]);
+      }
 
       const response = await axios.post("/employer/signup", formPayload, {
         headers: {
@@ -81,7 +79,7 @@ const EmployerSignup = () => {
         description: "",
         companyLogoUrl: null,
       });
-      
+
       setLogoPreview(null);
 
       toast.success(response?.data?.message || "Registered successfully!");
@@ -267,15 +265,18 @@ const EmployerSignup = () => {
             </div>
           )}
         </Form.Group>
-
-        <Button
-          variant="outline-danger"
-          type="submit"
-          className="w-full mt-3"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Registering..." : "Register as Employer"}
-        </Button>
+        {isSubmitting ? (
+          <Loading color="danger" />
+        ) : (
+          <Button
+            variant="outline-danger"
+            type="submit"
+            className="w-full mt-3"
+            disabled={isSubmitting}
+          >
+            Register as Employer
+          </Button>
+        )}
       </Form>
     </div>
   );

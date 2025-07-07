@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import toast from "react-hot-toast";
+import Loading from "../../components/Loading";
 const formatDate = (isoDate) => {
   if (!isoDate) return "Not available";
   const date = new Date(isoDate);
@@ -10,7 +11,7 @@ const formatDate = (isoDate) => {
 };
 
 const PostedJobDetail = () => {
-   const pathname = window.location.pathname;
+  const pathname = window.location.pathname;
   const { jobId } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
@@ -18,6 +19,7 @@ const PostedJobDetail = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
   const [updating, setUpdating] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const fetchJobDetail = async () => {
     try {
@@ -52,10 +54,8 @@ const PostedJobDetail = () => {
   const handleJobUpdate = async (e) => {
     e.preventDefault();
     setUpdating(true);
-
     try {
-      await axios.put(`/employer/update-job/${jobId}`);
-      
+      await axios.put(`/employer/update-job/${jobId}`, formData);
       toast.success("Job updated successfully!", {
         id: `err-error-${pathname}`,
       });
@@ -70,11 +70,12 @@ const PostedJobDetail = () => {
     }
   };
   const handleSendOffers = async () => {
+    setSending(true);
     try {
       const res = await axios.post(`/employer/send-jobOffer`, {
         jobId: Number(jobId),
       });
-     
+
       toast.success(res.data.message || "Offers sent successfully!", {
         id: `err-error-${pathname}`,
       });
@@ -82,11 +83,13 @@ const PostedJobDetail = () => {
       const message = err.response?.data?.message || "Unknown error";
       if (message === "Job openings already filled.") {
         toast.info("You cannot send more offers. All openings are filled.", {
-        id: `err-error-${pathname}`,
-      });
+          id: `err-error-${pathname}`,
+        });
       } else {
         console.error("Failed to send offers:", err);
       }
+    } finally {
+      setSending(false);
     }
   };
 
@@ -112,7 +115,6 @@ const PostedJobDetail = () => {
 
   return (
     <Layout>
-
       <div className="container max-w-4xl mx-auto py-10 px-6 space-y-10">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold border-b border-red-700 pb-2">
@@ -159,12 +161,18 @@ const PostedJobDetail = () => {
             <p className="mt-4">
               <strong>Description:</strong> {job.description}
             </p>
-            <button
-              onClick={handleSendOffers}
-              className="mt-6 text-red  hover:bg-red-700 border-2 border-red-700 hover:text-white px-4 py-2 rounded transition-all duration-300 "
-            >
-              Send Offer to Relevant Seekers
-            </button>
+
+            {sending ? (
+              <Loading  />
+            ) : (
+              <button
+                onClick={handleSendOffers}
+                disabled={sending}
+                className="mt-6 text-red  hover:bg-red-700 border-2 border-red-700 hover:text-white px-4 py-2 rounded transition-all duration-300 "
+              >
+                Send Offer to Relevant Seekers
+              </button>
+            )}
           </>
         ) : (
           <form onSubmit={handleJobUpdate} className="space-y-4">
