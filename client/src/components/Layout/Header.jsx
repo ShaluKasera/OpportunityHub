@@ -67,6 +67,7 @@ const Header = () => {
       setRole(null);
       localStorage.removeItem("user");
       localStorage.removeItem("role");
+      navigate('/');
     } catch (err) {
       // Error is globally handled
       toast.error("Logout failed");

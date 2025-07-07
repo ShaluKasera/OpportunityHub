@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import axios from "../../api/axios";
+import toast from "react-hot-toast";
 
 const EmployerProfile = () => {
   const [user, setUser] = useState({
-    profilePic: "",
+    companyLogo: "",
     name: "",
     email: "",
   });
@@ -20,85 +20,52 @@ const EmployerProfile = () => {
     isVerified: false,
   });
 
-  const [decoded, setDecoded] = useState(null);
-
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isCompanyEditOpen, setIsCompanyEditOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const fetchProfile = async () => {
       try {
-        const decodedToken = jwtDecode(token);
-        setDecoded(decodedToken);
-      } catch (err) {
-        console.error("Invalid token:", err);
+        const res = await axios.get("/employer/profile");
+       
+
+        const data = res.data.profile;
+        const userData = data.user || {};
+        
+        setUser((prev) => ({
+          ...prev,
+          name: userData.name,
+          email: userData.email,
+          location: data.location,
+          companyLogo:
+            data.companyLogoUrl ||
+            "https://randomuser.me/api/portraits/lego/2.jpg",
+        }));
+
+        setEmployer({
+          companyName: data.companyName,
+          companySize: data.companySize,
+          industry: data.industry,
+          location: data.location || userData.location,
+          description: data.description,
+          phone: data.phone,
+          isVerified: data.isVerified,
+        });
+      } catch (error) {
+        console.error("Failed to fetch profile:", error.message);
       }
+    };
 
-      const fetchProfile = async () => {
-        try {
-          const res = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/employer/profile`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          const data = res.data;
-
-          const userData = data.user || {};
-
-          setUser((prev) => ({
-            ...prev,
-            name: userData.name,
-            email: userData.email,
-            location: data.location,
-            profilePic:
-              userData.profilePic ||
-              "https://randomuser.me/api/portraits/lego/2.jpg",
-          }));
-
-          setEmployer({
-            companyName: data.companyName,
-            companySize: data.companySize,
-            industry: data.industry,
-            location: data.location || userData.location,
-            description: data.description,
-            phone: data.phone,
-            isVerified: data.isVerified,
-          });
-        } catch (error) {
-          console.error("Failed to fetch profile:", error.message);
-        }
-      };
-
-      fetchProfile();
-    }
+    fetchProfile();
   }, []);
 
   const updateProfile = async (profileData) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("No token found");
-      return;
-    }
-
     try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/employer/profile`,
-        profileData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.put("/employer/profile", profileData);
 
       if (res.status === 200) {
-        alert("Profile updated successfully!");
+        const pathname = window.location.pathname;
+        toast.success("Profile updated successfully!", {id: `err-error-${pathname}`});
       }
     } catch (error) {
       console.error(
@@ -176,7 +143,7 @@ const EmployerProfile = () => {
         </button>
         <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-10 px-2 sm:px-6">
           <img
-            src={user.profilePic}
+            src={user.companyLogo}
             alt={`${user.name} profile`}
             className="w-24 h-24 rounded-full object-cover border-2 border-red-700"
           />
@@ -243,7 +210,6 @@ const EmployerProfile = () => {
         </div>
       </section>
 
-      
       {/* Profile Edit Modal */}
       {isProfileEditOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-0">

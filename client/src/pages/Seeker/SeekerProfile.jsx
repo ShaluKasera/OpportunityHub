@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import axios from "../../api/axios";
+
 import JobTabsSection from "./JobTabsSection";
+import toast from "react-hot-toast";
 
 const SeekerProfile = () => {
   const [user, setUser] = useState({ profilePic: "", name: "", email: "" });
@@ -16,7 +17,6 @@ const SeekerProfile = () => {
     availabilityStatus: "",
   });
 
-  const [decoded, setDecoded] = useState(null);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isProfessionalEditOpen, setIsProfessionalEditOpen] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState([]);
@@ -25,72 +25,40 @@ const SeekerProfile = () => {
   const [jobOffersLoading, setJobOffersLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const fetchProfile = async () => {
       try {
-        setDecoded(jwtDecode(token));
-      } catch (err) {
-        console.error("Invalid token:", err);
+        const res = await axios.get("/seeker/profile");
+        const data = res.data;
+        const userData = data.user || {};
+        setUser({
+          name: userData.name,
+          email: userData.email,
+          profilePic:
+            data.profilePicUrl ||
+            "https://randomuser.me/api/portraits/lego/2.jpg",
+        });
+        setJobSeeker({
+          domain: data.domain,
+          location: data.location,
+          experienceYears: data.experienceYears,
+          phone: data.phone,
+          skills: Array.isArray(data.skills) ? data.skills : [],
+          resumeUrl: data.resumeUrl,
+          availabilityStatus: data.availabilityStatus,
+        });
+      } catch (error) {
+        console.error("Failed to fetch profile");
       }
-
-      const fetchProfile = async () => {
-        try {
-          const res = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/seeker/profile`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          const data = res.data;
-          const userData = data.user || {};
-
-          setUser({
-            name: userData.name,
-            email: userData.email,
-            profilePic:
-              userData.profilePic ||
-              "https://randomuser.me/api/portraits/lego/2.jpg",
-          });
-
-          setJobSeeker({
-            domain: data.domain,
-            location: data.location,
-            experienceYears: data.experienceYears,
-            phone: data.phone,
-            skills: data.skills,
-            resumeUrl: data.resumeUrl,
-            availabilityStatus: data.availabilityStatus,
-          });
-        } catch (error) {
-          console.error("Failed to fetch profile:", error.message);
-        }
-      };
-
-      fetchProfile();
-    }
+    };
+    fetchProfile();
   }, []);
 
   const updateProfile = async (profileData) => {
-    const token = localStorage.getItem("token");
-    if (!token) return console.error("No token found");
-
     try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/seeker/profile`,
-        profileData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (res.status === 200) alert("Profile updated successfully!");
+      const res = await axios.put("/seeker/profile", profileData);
+      if (res.status === 200) toast("Profile updated successfully!");
     } catch (error) {
-      console.error(
-        "Failed to update profile:",
-        error.response?.data || error.message
-      );
+      console.error("Failed to update profile");
     }
   };
 
@@ -137,25 +105,18 @@ const SeekerProfile = () => {
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/seeker/all-applied-job`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.success) {
-          const formattedJobs = res.data.applications.map((app) => ({
-            id: app.job.id,
-            title: app.job.title,
-            company: app.job.domain || "Unknown Company",
-          }));
-          setAppliedJobs(formattedJobs);
-        }
+         const res = await axios.get("/seeker/all-applied-job");
+          if (res.data.success) {
+        const formattedJobs = res.data.applications.map((app) => ({
+          id: app.job.id,
+          title: app.job.title,
+          company: app.job.domain || "Unknown Company",
+        }));
+        setAppliedJobs(formattedJobs);
+      }
       } catch (error) {
-        console.error("Error fetching applied jobs:", error);
-      } finally {
+         console.error("Error fetching applied jobs");
+      } finally{
         setAppliedJobsLoading(false);
       }
     };
@@ -165,14 +126,7 @@ const SeekerProfile = () => {
   useEffect(() => {
     const fetchOfferedJobs = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/seeker/job-offers`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
+        const res = await axios.get("/seeker/job-offers");
         if (res.data.success) {
           const formattedJobs = res.data.jobOffers.map((app) => ({
             jobId: app.job.id,
