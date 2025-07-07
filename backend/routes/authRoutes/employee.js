@@ -13,6 +13,7 @@ const {
   sendJobOffersToRelevantSeekers,
   getAllJobSeekersOffered,
   getAllAcceptedJobSeekers,
+  getallAcceptedapplications,
   getAcceptedJobSeekerDetails,
   getApplicationsByJobId,
   updateApplicationStatus,
@@ -109,6 +110,12 @@ router.get(
   auth,
   authorizeRoles(["employer"]),
   getallreviewedjobSeeker
+);
+router.get(
+  "/accepted-applications",
+  auth,
+  authorizeRoles(["employer"]),
+  getallAcceptedapplications
 );
 router.get(
   "/interview-applications",

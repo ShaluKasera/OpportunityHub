@@ -240,11 +240,11 @@ const updateJob = async (req, res) => {
   const updateData = req.body;
 
   // Fix here: use updateData.salary, not jobData.salary
-  if (updateData.salary && !updateData.salary.trim().startsWith("$")) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Salary must start with $" });
-  }
+  // if (updateData.salary && !updateData.salary.trim().startsWith("$")) {
+  //   return res
+  //     .status(400)
+  //     .json({ success: false, message: "Salary must start with $" });
+  // }
 
   const t = await sequelize.transaction();
 
@@ -1010,6 +1010,39 @@ const getallinterviewjobSeeker = async (req, res) => {
       });
   }
 };
+const getallAcceptedapplications = async (req, res) => {
+  try {
+    const applications = await JobApplication.findAll({
+      where: { status: "accepted" },
+      include: [
+        {
+          model: JobSeeker,
+          as: "jobSeeker",
+          include: [
+            {
+              model: User,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: Job,
+          as: "job",
+        },
+      ],
+    });
+
+    res.status(200).json(applications);
+  } catch (error) {
+    console.error("Error in getallAcceptedapplications", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error in  getallAcceptedapplications: ${error}`,
+      });
+  }
+};
 const getallrejectedjobSeeker = async (req, res) => {
   try {
     const applications = await JobApplication.findAll({
@@ -1062,8 +1095,8 @@ module.exports = {
   updateApplicationStatus,
   getAllApplications,
   getallappliedjobSeeker,
+  getallAcceptedapplications,
   getallreviewedjobSeeker,
-  
   getallinterviewjobSeeker,
   getallrejectedjobSeeker,
 };
