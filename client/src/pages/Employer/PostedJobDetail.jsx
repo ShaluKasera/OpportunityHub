@@ -55,7 +55,7 @@ const PostedJobDetail = () => {
 
     try {
       await axios.put(`/employer/update-job/${jobId}`);
-     
+      
       toast.success("Job updated successfully!", {
         id: `err-error-${pathname}`,
       });
@@ -220,7 +220,7 @@ const PostedJobDetail = () => {
                 className="border rounded p-2"
               />
               <input
-                type="text"
+                type="number"
                 name="salary"
                 value={formData.salary || ""}
                 onChange={handleInputChange}

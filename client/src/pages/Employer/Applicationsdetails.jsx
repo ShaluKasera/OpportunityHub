@@ -36,7 +36,7 @@ const ApplicationsDetail = () => {
   const saveStatusChange = async () => {
     try {
       setLoading(true);
-      await axios.put(`/employer/update-application-status/${applicationId}`);
+      await axios.put(`/employer/update-application-status/${applicationId}`,{ status });
        const pathname = window.location.pathname;
       toast.success(`Application status updated to "${status}"`,{id:`err-error-${pathname}`});
     } catch (error) {

@@ -62,7 +62,7 @@ const Header = () => {
   const logout = async () => {
     try {
       await axios.post("/user/logout", {}, { withCredentials: true });
-      toast.success("Logged out successfully");
+      // toast.success("Logged out successfully");
       setUser(null);
       setRole(null);
       localStorage.removeItem("user");

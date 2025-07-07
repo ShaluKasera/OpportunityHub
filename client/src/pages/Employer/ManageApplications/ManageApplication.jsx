@@ -13,7 +13,7 @@ const ManageApplication = () => {
       <InterviewApplications/>
       <ReviewApplications/>
       <AcceptedApplications/>
-      <RejectedApplications/>x  
+      <RejectedApplications/>
     </Layout>
   )
 }

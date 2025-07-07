@@ -74,8 +74,8 @@ const AcceptedApplications = () => {
                     sx={{ width: 48, height: 48 }}
                   />
                   <Typography variant="body2" color="text.secondary">
-                    {app.createdAt
-                      ? format(new Date(app.createdAt), "dd MMM yyyy")
+                    {app.acceptedAt
+                      ? format(new Date(app.acceptedAt), "dd MMM yyyy")
                       : "N/A"}
                   </Typography>
                 </Box>

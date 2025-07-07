@@ -1,28 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {jwtDecode} from "jwt-decode"; 
+import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
 
 const Detail = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [userRole, setUserRole] = useState(null); 
+  const [userRole, setUserRole] = useState(null);
+  const pathname = window.location.pathname;
+  const user = localStorage.getItem("user");
+  const isLoggedIn = !!user;
 
-  const token = localStorage.getItem("token");
-  const isLoggedIn = !!token;
-
-  // ✅ Decode token to get user role
   useEffect(() => {
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUserRole(decoded.role); 
+    const storedUser = localStorage.getItem("user");
+    const storedRole = localStorage.getItem("role"); 
+    if (storedUser && storedRole) {
+      setUserRole(storedRole);
     }
-  }, [token]);
+  }, []);
 
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-US", {
@@ -34,7 +33,7 @@ const Detail = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/job/${id}`);
+        const res = await axios.get(`/user/job/${id}`);
         if (res.data.success) {
           setJob(res.data.job);
         } else {
@@ -54,24 +53,17 @@ const Detail = () => {
   const handleApply = async () => {
     try {
       setApplying(true);
-      const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/seeker/apply-job`,
-        {
-          jobId: id,
-          coverLetter:
-            "I'm interested in this job and believe I can contribute effectively.",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.post(`/seeker/apply-job`, {
+        jobId: id,
+        coverLetter:
+          "I'm interested in this job and believe I can contribute effectively.",
+      });
 
-      toast.success(res.data.message || "Applied successfully");
+      toast.success(res.data.message || "Applied successfully", {
+        id: `err-error-${pathname}`,
+      });
     } catch (err) {
       console.error("Apply job error:", err);
-      toast.error(err.response?.data?.message || "Failed to apply to job");
     } finally {
       setApplying(false);
     }
@@ -83,7 +75,6 @@ const Detail = () => {
 
   return (
     <Layout>
-      <ToastContainer position="top-right" />
       <div className="container py-6">
         <div className="flex justify-between items-center mb-4">
           <div>

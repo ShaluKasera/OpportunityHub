@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 
 const formatDate = (isoDate) => {
@@ -20,11 +20,9 @@ const AppliedJobDetail = () => {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/seeker/applied-jobs/${jobId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      
+        const res = await axios.get(`/seeker/applied-jobs/${jobId}`, {
+        
         });
 
         if (res.data.success) {
