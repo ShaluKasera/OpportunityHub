@@ -23,10 +23,13 @@ router.get("/job/:id", getJodById);
 
 // for get user info
 router.get("/me", auth, (req, res) => {
+  const { name, role, email } = req.user;
   return res.json({
-    name: req.user.name,
-    role: req.user.role,
-    email: req.user.email,
+    user: {
+      name,
+      email,
+    },
+    role,
   });
 });
 
