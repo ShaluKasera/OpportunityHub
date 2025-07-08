@@ -42,7 +42,7 @@ const ApplicationsDetail = () => {
       });
       const pathname = window.location.pathname;
       toast.success(`Application status updated to "${status}"`, {
-        id: `err-error-${pathname}`,
+        id: `error-${pathname}`,
       });
     } catch (error) {
       console.error("Status update error:", error);

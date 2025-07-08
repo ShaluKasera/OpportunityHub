@@ -66,7 +66,7 @@ const JobTabsSection = ({
                       ? `/applied-job-details/${job.id}`
                       : `/offered-job-details/${job.jobOfferId}`
                   }
-                  className="text-center w-full sm:w-auto !no-underline !text-red-700 border-2 border-red-700 py-2 px-4 rounded-xl hover:bg-red-700 hover:!text-white transition-all duration-300 Ysabeau_Infant font-semibold text-sm sm:text-base"
+                  className="red-button"
                 >
                   View Details
                 </Link>

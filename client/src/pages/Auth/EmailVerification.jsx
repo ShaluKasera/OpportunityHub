@@ -5,7 +5,6 @@ import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/authContext";
 import Loading from "../../components/Loading";
-import { Button } from "react-bootstrap";
 const EmailVerification = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
@@ -16,7 +15,7 @@ const EmailVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
-
+  const pathname = window.location.pathname;//path name of the window
   const otpTimerRef = useRef(null);
   const resendTimerRef = useRef(null);
 
@@ -94,7 +93,7 @@ const EmailVerification = () => {
         otp: otp.join(""),
       });
 
-      toast.success(response.data.message);
+      toast.success(response.data.message,{ id: `success-${pathname}` });
 
       // Optionally update global user context
       if (setUser && response.data.user) {
@@ -118,7 +117,7 @@ const EmailVerification = () => {
 
       const response = await axios.post("/user/resend-otp", { email });
 
-      toast.success(response.data.message);
+      toast.success(response.data.message,{ id: `success-${pathname}` });
     } catch (error) {
       console.log("Resend otp error: ", error);
     } finally {
@@ -158,14 +157,13 @@ const EmailVerification = () => {
             ))}
           </div>
 
-          <Button
-            variant="outline-danger"
+          <button
             type="submit"
-            className="w-100"
+            className="red-button"
             disabled={isVerifying}
           >
             {isVerifying ? <Loading  /> : "Verify Email"}
-          </Button>
+          </button>
 
           <p className="mt-3 text-center text-gray-600 text-sm">
             OTP expires in:{" "}
@@ -174,7 +172,7 @@ const EmailVerification = () => {
 
           <div className="mt-4 text-center">
             
-              <Button
+              <button
                 type="submit"
                 onClick={resendOtpHandler}
                 disabled={resendTimer > 0}
@@ -187,7 +185,7 @@ const EmailVerification = () => {
                 {resendTimer > 0
                   ? `Resend OTP in ${resendTimer}s`
                   : "Resend OTP"}
-              </Button>
+              </button>
            
           </div>
         </form>

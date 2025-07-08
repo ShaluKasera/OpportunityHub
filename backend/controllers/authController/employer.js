@@ -124,8 +124,9 @@ const updateEmployerProfile = async (req, res) => {
       industry,
       location,
       description,
-      companyLogoUrl,
-    } = req.body;
+    } = req.body || {};
+    const companyLogoUrl = req.file?.path || null;
+
 
     if (name) {
       await User.update({ name }, { where: { id: userId }, transaction: t });
@@ -149,7 +150,7 @@ const updateEmployerProfile = async (req, res) => {
     if (location) updateData.location = location;
     if (description) updateData.description = description;
     if (companyLogoUrl) updateData.companyLogoUrl = companyLogoUrl;
-
+     
     if (Object.keys(updateData).length > 0) {
       await Employer.update(updateData, { where: { userId }, transaction: t });
     }

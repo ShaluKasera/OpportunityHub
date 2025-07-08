@@ -5,14 +5,11 @@ import {
   TextField,
   Paper,
   MenuItem,
-  CircularProgress,
-  Fade,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import axios from "../../api/axios";
-import { Button } from "react-bootstrap";
 import Layout from "../../components/Layout/Layout";
 import toast from "react-hot-toast";
 import Loading from "../../components/Loading";
@@ -74,7 +71,7 @@ const PostJob = () => {
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
       toast.success(response.data.message, {
-        id: `err-error-${pathname}`,
+        id: `success-${pathname}`,
       });
     } catch (error) {
       console.error("Post job error:", error.response?.data || error.message);
@@ -172,14 +169,13 @@ const PostJob = () => {
               </TextField>
 
               <Box mt={3} textAlign="center">
-                <Button
-                  variant="outline-danger"
+                <button
                   type="submit"
-                  className="w-100"
+                  className="red-button"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? <Loading /> : "Post Job"}
-                </Button>
+                </button>
               </Box>
             </form>
           </Paper>

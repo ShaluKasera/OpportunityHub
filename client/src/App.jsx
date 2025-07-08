@@ -16,6 +16,7 @@ import PostedJobDetail from "./pages/Employer/PostedJobDetail";
 import ApplicationsDetail from "./pages/Employer/Applicationsdetails";
 import Dashboard from "./pages/Employer/Dashboard/Dashboard";
 import ManageApplication from "./pages/Employer/ManageApplications/ManageApplication";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
         <Route path="/employer-dashboard" element={<Dashboard />} />
         <Route path="/manage-applications" element={<ManageApplication />} />
       </Routes>
+      <CookieConsentBanner />
     </BrowserRouter>
   );
 }

@@ -25,7 +25,7 @@ const SeekerSignup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [profilePreview, setProfilePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+   const pathname = window.location.pathname;
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -58,8 +58,8 @@ const SeekerSignup = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      toast.success(response?.data?.message || "Registered successfully");
+      
+      toast.success(response?.data?.message || "Registered successfully",{id: `success-${pathname}`});
 
       setFormData({
         name: "",

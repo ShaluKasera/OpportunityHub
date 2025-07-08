@@ -12,7 +12,6 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button } from "react-bootstrap";
 
 const style = {
   position: "absolute",
@@ -115,14 +114,13 @@ const OfferedSeeker = () => {
                 />
               </Box>
 
-              <Button
-                variant="outline-danger"
-                sx={{ mt: 2, fontWeight: "bold", textTransform: "none" }}
+              <button
+                
                 onClick={() => setSelected(offer)}
-                className="w-full mt-2"
+                className="red-button"
               >
                 View Details
-              </Button>
+              </button>
             </CardContent>
           </Card>
         ))}

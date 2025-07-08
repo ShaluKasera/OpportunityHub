@@ -47,8 +47,8 @@ const jobSeekerSignup = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    const existingEmail = await User.findOne({ where: { email  } });
-     const existingPhone = await JobSeeker.findOne({ where: { phone  } });
+    const existingEmail = await User.findOne({ where: { email } });
+    const existingPhone = await JobSeeker.findOne({ where: { phone } });
     if (existingPhone || existingEmail) {
       return res
         .status(400)
@@ -124,7 +124,10 @@ const getMyProfile = async (req, res) => {
       ],
     });
 
-    if (!profile) return res.status(404).json({success:false, message: "Profile not found" });
+    if (!profile)
+      return res
+        .status(404)
+        .json({ success: false, message: "Profile not found" });
 
     res.status(200).json(profile);
   } catch (error) {
@@ -147,9 +150,8 @@ const updateSeekerProfile = async (req, res) => {
       experienceYears,
       skills,
       resumeUrl,
-      profilePicUrl,
-    } = req.body;
-
+    } = req.body||{};
+    const profilePicUrl = req.file?.path;
     if (name) {
       await User.update({ name }, { where: { id: userId }, transaction: t });
     }
@@ -160,7 +162,9 @@ const updateSeekerProfile = async (req, res) => {
     });
     if (!jobSeeker) {
       await t.rollback();
-      return res.status(404).json({success: false, message: "Employer profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Employer profile not found" });
     }
 
     const updateData = {};
@@ -176,11 +180,18 @@ const updateSeekerProfile = async (req, res) => {
       await JobSeeker.update(updateData, { where: { userId }, transaction: t });
     }
     await t.commit();
-    return res.status(200).json({success: true, message: "Profile updated successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully" });
   } catch (error) {
     await t.rollback();
     console.error("Update Seeker Profile Error:", error);
-    return res.status(500).json({success: false, message: `Update Seeker Profile error: ${error}`});
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: `Update Seeker Profile error: ${error}`,
+      });
   }
 };
 
@@ -493,7 +504,9 @@ const getJobOffersForSeeker = async (req, res) => {
     });
 
     if (!jobSeeker) {
-      return res.status(404).json({success:false, message: "Job seeker not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Job seeker not found" });
     }
 
     const offers = await JobOffer.findAll({
@@ -521,8 +534,12 @@ const getJobOffersForSeeker = async (req, res) => {
     res.status(200).json({ success: true, jobOffers: offers });
   } catch (error) {
     console.error("Error fetching job offers for seeker:", error);
-    res.status(500).json({ success: false,
-      message: `Error fetching job offers for seeker: ${error}`, });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: `Error fetching job offers for seeker: ${error}`,
+      });
   }
 };
 
@@ -615,7 +632,9 @@ const updateJobOfferStatus = async (req, res) => {
       .json({ success: true, message: "Job offer updated", jobOffer });
   } catch (error) {
     console.error("Update job offer error:", error);
-    res.status(500).json({ success: false, message:`Update job offer error: ${error}`});
+    res
+      .status(500)
+      .json({ success: false, message: `Update job offer error: ${error}` });
   }
 };
 

@@ -61,7 +61,7 @@ const Detail = () => {
       });
 
       toast.success(res.data.message || "Applied successfully", {
-        id: `err-error-${pathname}`,
+        id: `success-${pathname}`,
       });
     } catch (err) {
       console.error("Apply job error:", err);
@@ -95,7 +95,7 @@ const Detail = () => {
             <button
               onClick={handleApply}
               disabled={applying}
-              className="px-6 py-2 bg-red-700 hover:bg-white text-white rounded-3xl border-2 hover:text-red-700 border-red-700 hover:border-red-700 duration-300"
+              className="red-button"
             >
               {applying ? (
               <Loading  />) : ( "Apply Now" )}

@@ -30,5 +30,28 @@
   color: white;
 }
 
+.red-button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none !important;
+  color: #b91c1c !important; 
+  border: 2px solid #b91c1c;
+  padding-top: 0.2rem;  
+  padding-bottom: 0.2rem;
+  border-radius: 0.75rem; 
+  font-weight: bold;
+  font-size: 1.25rem; 
+  font-family: 'Ysabeau Infant', sans-serif;
+  transition: all 0.7s ease;
+  margin-top: 20px;
+}
+
+.red-button:hover {
+  background-color: #b91c1c;
+  color: white !important;
+}
+
+
 
 

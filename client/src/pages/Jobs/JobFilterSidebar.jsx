@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import Button from "react-bootstrap/Button";
 
 const JobFilterSidebar = ({ onFilterChange, onClose }) => {
   const [title, setTitle] = useState("");
@@ -95,9 +94,9 @@ const JobFilterSidebar = ({ onFilterChange, onClose }) => {
       </div>
 
       {/* Apply Filters Button */}
-      <Button variant="outline-danger"   onClick={applyFilters}  >
+      <button className="red-button"   onClick={applyFilters}  >
         Apply Filters
-      </Button>
+      </button>
     </div>
   );
 };

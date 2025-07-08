@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 import Layout from "../../components/Layout/Layout";
 import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast from "react-hot-toast";
+
 import Loading from "../../components/Loading";
 const ForgetPassword = () => {
   const [step, setStep] = useState(1);
@@ -13,7 +13,7 @@ const ForgetPassword = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [passwords, setPasswords] = useState({ newPass: "", confirmPass: "" });
   const [loading, setLoading] = useState(false);
-
+  const pathname = window.location.pathname;
   const handleOtpChange = (e, index) => {
     const value = e.target.value;
     if (!/^\d*$/.test(value)) return;
@@ -49,16 +49,16 @@ const ForgetPassword = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/user/forgot-password`,
+        `$/user/forgot-password`,
         {
           email,
           name: email.split("@")[0],
         }
       );
-      toast.success(response.data.message);
+      toast.success(response.data.message,{id: `success-${pathname}`});
       setStep(2);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to send OTP");
+      console.log("send OTP error: ",error)
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ const ForgetPassword = () => {
   const verifyOtp = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP");
+      toast.error("Please enter a valid 6-digit OTP",{id: `err-error-${pathname}`});
       return;
     }
 
@@ -80,10 +80,10 @@ const ForgetPassword = () => {
           otp: enteredOtp,
         }
       );
-      toast.success(response.data.message);
+      toast.success(response.data.message,{id: `success-${pathname}`});
       setStep(3);
     } catch (error) {
-      toast.error(error.response?.data?.message || "OTP verification failed");
+      console.log("OTP verification failed: ",error);
     } finally {
       setLoading(false);
     }
@@ -93,12 +93,12 @@ const ForgetPassword = () => {
     const enteredOtp = otp.join("");
 
     if (passwords.newPass !== passwords.confirmPass) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match",{id: `err-error-${pathname}`});
       return;
     }
 
     if (passwords.newPass.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters",{id: `err-error-${pathname}`});
       return;
     }
 
@@ -113,10 +113,10 @@ const ForgetPassword = () => {
         }
       );
 
-      toast.success(response.data.message);
+      toast.success(response.data.message,{id: `success-${pathname}`});
       setStep(4);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to reset password");
+      tconsole.log( "Failed to reset password: ",error);
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,6 @@ const ForgetPassword = () => {
 
   return (
     <Layout>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="mx-auto w-[80%] md:w-[60%] lg:w-[30%] mt-20 border p-8 rounded shadow-lg bg-white">
         {step === 1 && (
           <>
@@ -145,7 +144,7 @@ const ForgetPassword = () => {
             
               <button
                 onClick={sendOtp}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+                className="red-button"
                 disabled={loading}
               >
                 {loading ? (
@@ -182,7 +181,7 @@ const ForgetPassword = () => {
             
               <button
                 onClick={verifyOtp}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+                className="red-button"
                 disabled={loading}
               >{loading ? (
               <Loading color="danger" />

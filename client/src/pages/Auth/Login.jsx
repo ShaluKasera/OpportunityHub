@@ -29,10 +29,10 @@ const Login = ({ show, onClose, onLoginSuccess }) => {
 
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       localStorage.setItem("role", userData.role);
-      // localStorage.setItem("email", userData.email);
 
       onLoginSuccess(loggedInUser);
-      toast.success("Login successful!");
+       const pathname = window.location.pathname;
+      toast.success("Login successful!",{id: `success-${pathname}`});
       onClose();
 
       setTimeout(() => {

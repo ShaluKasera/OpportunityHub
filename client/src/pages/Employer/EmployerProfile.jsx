@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Button from "react-bootstrap/Button";
 import axios from "../../api/axios";
 import toast from "react-hot-toast";
+import FileUpload from "../../components/FileUpload";
+import Loading from "../../components/Loading";
 
 const EmployerProfile = () => {
   const [user, setUser] = useState({
@@ -9,7 +10,8 @@ const EmployerProfile = () => {
     name: "",
     email: "",
   });
-
+  const [loading, setLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
   const [employer, setEmployer] = useState({
     companyName: "",
     companySize: "",
@@ -29,7 +31,7 @@ const EmployerProfile = () => {
         const res = await axios.get("/employer/profile");
         const data = res.data.profile;
         const userData = data.user || {};
-        
+
         setUser((prev) => ({
           ...prev,
           name: userData.name,
@@ -58,18 +60,28 @@ const EmployerProfile = () => {
   }, []);
 
   const updateProfile = async (profileData) => {
+    setLoading(true);
     try {
-      const res = await axios.put("/employer/profile", profileData);
+      const res = await axios.put("/employer/profile", profileData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (res.status === 200) {
+        window.location.reload();
         const pathname = window.location.pathname;
-        toast.success("Profile updated successfully!", {id: `err-error-${pathname}`});
+        toast.success("Profile updated successfully!", {
+          id: `success-${pathname}`,
+        });
       }
     } catch (error) {
       console.error(
         "Failed to update profile:",
         error.response?.data || error.message
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,22 +101,28 @@ const EmployerProfile = () => {
       [name]: value,
     }));
   };
+  const handleFile = (file) => {
+    setLogoFile(file);
+  };
 
   // SAVE PROFILE BUTTON
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
 
-    const profileData = {
-      name: user.name,
-      phone: employer.phone,
-      companyName: employer.companyName,
-      companySize: employer.companySize,
-      industry: employer.industry,
-      location: employer.location,
-      description: employer.description,
-    };
+    const formData = new FormData();
+    formData.append("name", user.name);
+    formData.append("phone", employer.phone);
+    formData.append("companyName", employer.companyName);
+    formData.append("companySize", employer.companySize);
+    formData.append("industry", employer.industry);
+    formData.append("location", employer.location);
+    formData.append("description", employer.description);
 
-    updateProfile(profileData);
+    if (logoFile) {
+      formData.append("companyLogoUrl", logoFile);
+    }
+
+    await updateProfile(formData);
     setIsProfileEditOpen(false);
   };
 
@@ -230,23 +248,18 @@ const EmployerProfile = () => {
               placeholder="Name"
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
             />
-            <input
-              type="email"
-              name="email"
-              value={user.email}
-              onChange={handleProfileChange}
-              placeholder="Email"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
-              disabled
-            />
-
-            <Button
-              variant="outline-danger"
-              onClick={handleSaveProfile}
-              className="w-full font-bold"
-            >
-              Save
-            </Button>
+            <FileUpload label="Upload Company Logo" onChange={handleFile} />
+            {loading ? (
+              <Loading width="100%"/>
+            ) : (
+              <button
+                onClick={handleSaveProfile}
+                disabled={loading}
+                className="red-button"
+              >
+                Save
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -313,13 +326,17 @@ const EmployerProfile = () => {
               className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
               rows={4}
             />
-            <Button
-              variant="outline-danger"
-              onClick={handleSaveCompany}
-              className="w-full font-bold"
-            >
-              Save
-            </Button>
+            {loading ? (
+              <Loading width="100%"/>
+            ) : (
+              <button
+                onClick={handleCompanyChange}
+                disabled={loading}
+                className="red-button"
+              >
+                Save
+              </button>
+            )}
           </div>
         </div>
       )}

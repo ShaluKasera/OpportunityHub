@@ -101,9 +101,8 @@ const RejectedApplications = () => {
                   ))}
                 </Box>
 
-                <Button
-                  variant="outline-danger"
-                  className="w-full mt-2"
+                <button
+                  className="red-button"
                   onClick={() =>
                     navigate(`/application-detail/${app.id}`, {
                       state: app,
@@ -111,7 +110,7 @@ const RejectedApplications = () => {
                   }
                 >
                   View Details
-                </Button>
+                </button>
               </CardContent>
             </Card>
           ))}

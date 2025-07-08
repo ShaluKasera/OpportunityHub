@@ -10,7 +10,6 @@ import {
   Chip,
   Box,
 } from "@mui/material";
-import { Button } from "react-bootstrap";
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -110,9 +109,8 @@ const Applications = () => {
                   />
                 </Box>
 
-                <Button
-                  variant="outline-danger"
-                  className="w-full mt-2"
+                <button
+                  className="red-button"
                   onClick={() =>
                     navigate(`/application-detail/${app.id}`, {
                       state: app,
@@ -120,7 +118,7 @@ const Applications = () => {
                   }
                 >
                   View Details
-                </Button>
+                </button>
               </CardContent>
             </Card>
           ))}

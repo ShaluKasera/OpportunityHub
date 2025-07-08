@@ -1,14 +1,22 @@
 import React from "react";
 
-const Loading = ({ color = "danger" }) => {
+const Loading = ({ color = "danger", width = "auto" }) => {
   return (
-     <div className="d-flex justify-content-center">
-  <div className={`spinner-border text-${color}`} role="status">
-    <span className="visually-hidden">Loading...</span>
-  </div>
-</div>
+    <button
+      className={`btn btn-${color}`}
+      type="button"
+      style={{ width }}
+      disabled
+    >
+      <span
+        className="spinner-border spinner-border-sm"
+        aria-hidden="true"
+      ></span>
+      <span className="visually-hidden" role="status">
+        Loading...
+      </span>
+    </button>
   );
 };
 
 export default Loading;
-

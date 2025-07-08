@@ -23,6 +23,7 @@ router.post("/signup", upload.single("profilePic"), jobSeekerSignup);
 router.get("/profile", auth, authorizeRoles(["job_seeker"]), getMyProfile);
 router.put(
   "/profile",
+   upload.single("profilePic"),
   auth,
   authorizeRoles(["job_seeker"]),
   updateSeekerProfile

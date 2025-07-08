@@ -56,7 +56,7 @@ const Cards = ({ job }) => {
 
       <Link
         to={`/job-details/${job.id}`}
-        className="block  text-center !no-underline !text-red-700 border-2 border-red-700 py-2 rounded-xl hover:bg-red-700 hover:!text-white transition-all duration-700 Ysabeau_Infant  font-bold text-xl"
+        className="red-button"
       >
         View Details
       </Link>

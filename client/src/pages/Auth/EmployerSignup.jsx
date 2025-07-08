@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { BsCloudUpload } from "react-icons/bs";
 import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,6 @@ import {
   FormControl,
 } from "@mui/material";
 import toast from "react-hot-toast";
-import "react-toastify/dist/ReactToastify.css";
 import Loading from "../../components/Loading";
 
 const EmployerSignup = () => {
@@ -34,6 +33,7 @@ const EmployerSignup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+   const pathname = window.location.pathname;
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -85,7 +85,7 @@ const EmployerSignup = () => {
 
       setLogoPreview(null);
 
-      toast.success(response?.data?.message || "Registered successfully!");
+      toast.success(response?.data?.message || "Registered successfully!", {id: `success-${pathname}`});
 
       setTimeout(() => {
         navigate("/verify-email", { state: { email: formData.email } });
@@ -294,14 +294,14 @@ const EmployerSignup = () => {
         )}
       </Box>
 
-      <Button
-        variant="outline-danger"
+      <button
+        
         type="submit"
-        className="w-full mt-3"
+        className="red-button"
         disabled={isSubmitting}
       >
         {isSubmitting ? <Loading color="danger" /> : "Register as Employer"}
-      </Button>
+      </button>
     </Form>
   );
 };

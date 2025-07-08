@@ -57,7 +57,7 @@ const PostedJobDetail = () => {
     try {
       await axios.put(`/employer/update-job/${jobId}`, formData);
       toast.success("Job updated successfully!", {
-        id: `err-error-${pathname}`,
+        id: `success-${pathname}`,
       });
       setTimeout(() => {
         setEditMode(false);
@@ -77,13 +77,13 @@ const PostedJobDetail = () => {
       });
 
       toast.success(res.data.message || "Offers sent successfully!", {
-        id: `err-error-${pathname}`,
+        id: `sucess-${pathname}`,
       });
     } catch (err) {
       const message = err.response?.data?.message || "Unknown error";
       if (message === "Job openings already filled.") {
         toast.info("You cannot send more offers. All openings are filled.", {
-          id: `err-error-${pathname}`,
+          id: `info-${pathname}`,
         });
       } else {
         console.error("Failed to send offers:", err);
@@ -123,7 +123,7 @@ const PostedJobDetail = () => {
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              className="hover:bg-red-700 hover:text-white text-red-700 px-4 py-2 rounded border-2 border-red-700 transition-all duration-300"
+              className="red-button !w-24"
             >
               Edit Job
             </button>
@@ -162,17 +162,22 @@ const PostedJobDetail = () => {
               <strong>Description:</strong> {job.description}
             </p>
 
-            
+            <div className="flex flex-col justify-between md:!flex-row">
+             
               <button
+                onClick={() => navigate(-1)}
+                className="mt-4 flex px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-all duration-300"
+              >
+                <span className="font-bold  me-2">←</span> Back
+              </button>
+               <button
                 onClick={handleSendOffers}
                 disabled={sending}
-                className="mt-6 text-red  hover:bg-red-700 border-2 border-red-700 hover:text-white px-4 py-2 rounded transition-all duration-300 "
-              >{sending ? (
-              <Loading  />
-            ) : (
-                "Send Offer to Relevant Seekers"  )}
+                className="red-button !w-76 "
+              >
+                {sending ? <Loading /> : "Send Offer to Relevant Seekers"}
               </button>
-          
+            </div>
           </>
         ) : (
           <form onSubmit={handleJobUpdate} className="space-y-4">
@@ -280,13 +285,6 @@ const PostedJobDetail = () => {
             </div>
           </form>
         )}
-
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 flex px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-all duration-300"
-        >
-          <span className="font-bold  me-2">←</span> Back
-        </button>
       </div>
     </Layout>
   );

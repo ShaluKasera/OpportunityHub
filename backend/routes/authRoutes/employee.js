@@ -36,6 +36,7 @@ router.get("/profile", auth, authorizeRoles(["employer"]), getMyProfile);
 
 router.put(
   "/profile",
+  upload.single("companyLogoUrl"),
   auth,
   authorizeRoles(["employer"]),
   updateEmployerProfile

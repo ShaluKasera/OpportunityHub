@@ -21,7 +21,7 @@ const OfferedJobDetails = () => {
   const [jobData, setJobData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [responseLoading, setResponseLoading] = useState(false);
-
+  const pathname = window.location.pathname;
   const fetchJobDetails = async () => {
     try {
       const res = await axios.get(`/seeker/job-offers/${id}`);
@@ -41,7 +41,7 @@ const OfferedJobDetails = () => {
       await axios.put(`/seeker/job-offers/${id}`, { status: action });
 
       toast.success(
-        `Offer ${action === "accepted" ? "accepted" : "rejected"} successfully`
+        `Offer ${action === "accepted" ? "accepted" : "rejected"} successfully`,{id: `success-${pathname}`}
       );
       fetchJobDetails();
     } catch (error) {
@@ -186,15 +186,14 @@ const OfferedJobDetails = () => {
               </Button>
           
             
-              <Button
-                variant="outline-danger"
-                className="w-full sm:w-auto"
+              <button
+                className="red-button"
                 onClick={() => handleResponse("rejected")}
               >{responseLoading ? (
               <Loading />
             ) : (
                " Reject Offer" )}
-              </Button>
+              </button>
            
           </div>
         )}

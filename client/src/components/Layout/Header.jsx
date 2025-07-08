@@ -14,26 +14,24 @@ const Header = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+   const pathname = window.location.pathname;
 
   useEffect(() => {
     const consent = localStorage.getItem("cookieConsent");
-    const token = localStorage.getItem("token");
-
-    // ✅ Try localStorage first
     const storedUser = localStorage.getItem("user");
     const storedRole = localStorage.getItem("role");
 
     if (storedUser && storedRole) {
       setUser(JSON.parse(storedUser));
       setRole(storedRole);
-      return; // Skip fetch if already stored
+      return; 
     }
 
-    if (consent !== "accepted" || !token) return;
+    if (consent !== "accepted") return;
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get("/user/me", { withCredentials: true });
+        const res = await axios.get("/user/me");
         setUser(res.data);
         setRole(res.data.role);
 
@@ -61,8 +59,10 @@ const Header = () => {
 
   const logout = async () => {
     try {
-      await axios.post("/user/logout", {}, { withCredentials: true });
-      // toast.success("Logged out successfully");
+      await axios.post("/user/logout", {});
+      toast.success("Logged out successfully", {
+      id: `err-error-${pathname}`, 
+    });
       setUser(null);
       setRole(null);
       localStorage.removeItem("user");
@@ -70,7 +70,9 @@ const Header = () => {
       navigate('/');
     } catch (err) {
       // Error is globally handled
-      toast.error("Logout failed");
+      toast.error("Logout failed", {
+      id: `err-error-${pathname}`, 
+    });
     }
   };
 

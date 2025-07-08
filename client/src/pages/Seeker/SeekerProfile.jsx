@@ -23,6 +23,7 @@ const SeekerProfile = () => {
   const [jobOffers, setJobOffers] = useState([]);
   const [appliedJobsLoading, setAppliedJobsLoading] = useState(true);
   const [jobOffersLoading, setJobOffersLoading] = useState(true);
+  const pathname = window.location.pathname;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -56,7 +57,7 @@ const SeekerProfile = () => {
   const updateProfile = async (profileData) => {
     try {
       const res = await axios.put("/seeker/profile", profileData);
-      if (res.status === 200) toast("Profile updated successfully!");
+      if (res.status === 200) toast("Profile updated successfully!",{id: `success-${pathname}`});
     } catch (error) {
       console.error("Failed to update profile");
     }
@@ -153,7 +154,7 @@ const SeekerProfile = () => {
       <section className="relative bg-white p-6 rounded-xl border shadow">
         <p className="text-2xl sm:text-3xl font-bold mb-4">Profile</p>
         <button
-          className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300"
+          className="red-button"
           onClick={() => setIsProfileEditOpen(true)}
         >
           Edit
@@ -176,7 +177,7 @@ const SeekerProfile = () => {
       <section className="relative bg-white p-4 sm:p-6 rounded-xl border shadow space-y-4 text-sm sm:text-base">
         <p className="text-xl sm:text-2xl font-bold">Professional Details</p>
         <button
-          className="absolute top-4 right-4 text-red-700 border-2 px-3 py-1 !rounded-2xl hover:text-white hover:bg-red-700 border-red-700 font-medium duration-300 text-sm sm:text-base"
+          className="red-button"
           onClick={() => setIsProfessionalEditOpen(true)}
         >
           Edit

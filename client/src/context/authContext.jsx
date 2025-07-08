@@ -4,31 +4,30 @@ import { toast } from "react-hot-toast";
 
 const AuthContext = createContext();
 
- const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
     const consent = localStorage.getItem("cookieConsent");
 
-    if (token && userData && consent === "accepted") {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(JSON.parse(userData));
-      fetchUserRole();
+    // Only proceed if user accepted cookie usage
+    if (consent === "accepted") {
+      fetchUserData(); // Get user + role from server using cookie
     } else {
-      setLoading(false);
+      setLoading(false); // No cookie consent = no login attempt
     }
   }, []);
 
-  const fetchUserRole = async () => {
+  const fetchUserData = async () => {
     try {
       const res = await axios.get("/user/me");
+      setUser(res.data.user);
       setRole(res.data.role);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to fetch user role");
+      const pathname = window.location.pathname;
+      toast.error(err.response?.data?.message || "Failed to fetch user role",{ id: `err-error-${pathname}` });
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,7 @@ const AuthContext = createContext();
   );
 };
 
- const useAuth = () => {
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
