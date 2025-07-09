@@ -169,13 +169,14 @@ const PostJob = () => {
               </TextField>
 
               <Box mt={3} textAlign="center">
-                <button
+                 {isSubmitting ? <Loading width="100%"/> : <button
                   type="submit"
                   className="red-button"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? <Loading /> : "Post Job"}
-                </button>
+                 Post Job
+                </button>}
+                
               </Box>
             </form>
           </Paper>

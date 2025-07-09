@@ -91,16 +91,19 @@ const Detail = () => {
             </div>
           </div>
 
-          {isLoggedIn && userRole === "job_seeker" && (
-            <button
-              onClick={handleApply}
-              disabled={applying}
-              className="red-button"
-            >
-              {applying ? (
-              <Loading  />) : ( "Apply Now" )}
-            </button>
-          )}
+          {isLoggedIn &&
+            userRole === "job_seeker" &&
+            (applying ? (
+              <Loading width="150px"/>
+            ) : (
+              <button
+                onClick={handleApply}
+                disabled={applying}
+                className="red-button !w-36"
+              >
+                Apply Now
+              </button>
+            ))}
         </div>
 
         {/* Job Details */}

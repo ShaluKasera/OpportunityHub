@@ -31,8 +31,8 @@ const Login = ({ show, onClose, onLoginSuccess }) => {
       localStorage.setItem("role", userData.role);
 
       onLoginSuccess(loggedInUser);
-       const pathname = window.location.pathname;
-      toast.success("Login successful!",{id: `success-${pathname}`});
+      const pathname = window.location.pathname;
+      toast.success("Login successful!", { id: `success-${pathname}` });
       onClose();
 
       setTimeout(() => {
@@ -113,18 +113,15 @@ const Login = ({ show, onClose, onLoginSuccess }) => {
               Forgot Password?
             </Link>
           </div>
-          
-            <Button
-              variant="outline-danger"
-              className="w-full mt-4"
+          {loading ? (
+            <Loading width="100%" />
+          ) : (
+            <button
+              className="red-button"
               type="submit"
               disabled={loading}
-            >{loading ? (
-            <Loading color="danger" />
-          ) : (
-              "Login"   )}
-            </Button>
-       
+            >Login</button>
+          )}
 
           <div className="d-flex align-items-center justify-content-center my-3">
             <span className="border-bottom w-100"></span>

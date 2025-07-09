@@ -48,17 +48,14 @@ const ForgetPassword = () => {
   const sendOtp = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(
-        `$/user/forgot-password`,
-        {
-          email,
-          name: email.split("@")[0],
-        }
-      );
-      toast.success(response.data.message,{id: `success-${pathname}`});
+      const response = await axios.post(`$/user/forgot-password`, {
+        email,
+        name: email.split("@")[0],
+      });
+      toast.success(response.data.message, { id: `success-${pathname}` });
       setStep(2);
     } catch (error) {
-      console.log("send OTP error: ",error)
+      console.log("send OTP error: ", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +64,9 @@ const ForgetPassword = () => {
   const verifyOtp = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP",{id: `err-error-${pathname}`});
+      toast.error("Please enter a valid 6-digit OTP", {
+        id: `err-error-${pathname}`,
+      });
       return;
     }
 
@@ -80,10 +79,10 @@ const ForgetPassword = () => {
           otp: enteredOtp,
         }
       );
-      toast.success(response.data.message,{id: `success-${pathname}`});
+      toast.success(response.data.message, { id: `success-${pathname}` });
       setStep(3);
     } catch (error) {
-      console.log("OTP verification failed: ",error);
+      console.log("OTP verification failed: ", error);
     } finally {
       setLoading(false);
     }
@@ -93,12 +92,14 @@ const ForgetPassword = () => {
     const enteredOtp = otp.join("");
 
     if (passwords.newPass !== passwords.confirmPass) {
-      toast.error("Passwords do not match",{id: `err-error-${pathname}`});
+      toast.error("Passwords do not match", { id: `err-error-${pathname}` });
       return;
     }
 
     if (passwords.newPass.length < 6) {
-      toast.error("Password must be at least 6 characters",{id: `err-error-${pathname}`});
+      toast.error("Password must be at least 6 characters", {
+        id: `err-error-${pathname}`,
+      });
       return;
     }
 
@@ -113,10 +114,10 @@ const ForgetPassword = () => {
         }
       );
 
-      toast.success(response.data.message,{id: `success-${pathname}`});
+      toast.success(response.data.message, { id: `success-${pathname}` });
       setStep(4);
     } catch (error) {
-      tconsole.log( "Failed to reset password: ",error);
+      tconsole.log("Failed to reset password: ", error);
     } finally {
       setLoading(false);
     }
@@ -135,23 +136,23 @@ const ForgetPassword = () => {
             </label>
             <input
               type="email"
-              className="w-full border px-4 py-2 mb-4 rounded"
+              className="w-full input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
             />
-            
+            {loading ? (
+              <Loading width="100%"  />
+            ) : (
               <button
                 onClick={sendOtp}
                 className="red-button"
                 disabled={loading}
               >
-                {loading ? (
-              <Loading color="danger" />
-            ) : ("Send OTP" )}
+                Send OTP
               </button>
-           
+            )}
           </>
         )}
 
@@ -174,21 +175,21 @@ const ForgetPassword = () => {
                   value={digit}
                   onChange={(e) => handleOtpChange(e, i)}
                   onKeyDown={(e) => handleOtpKeyDown(e, i)}
-                  className="w-10 h-10 text-center border rounded text-lg"
+                  className="w-10 input"
                 />
               ))}
             </div>
-            
+            {loading ? (
+              <Loading width="100%" />
+            ) : (
               <button
                 onClick={verifyOtp}
                 className="red-button"
                 disabled={loading}
-              >{loading ? (
-              <Loading color="danger" />
-            ) : (
-                "Verify OTP"  )}
+              >
+                Verify OTP
               </button>
-          
+            )}
           </>
         )}
 
@@ -205,7 +206,7 @@ const ForgetPassword = () => {
                 onChange={(e) =>
                   setPasswords({ ...passwords, newPass: e.target.value })
                 }
-                className="w-full border px-4 py-2 rounded mt-1"
+                className="w-full input"
                 placeholder="Enter new password"
               />
               <span
@@ -224,7 +225,7 @@ const ForgetPassword = () => {
                 onChange={(e) =>
                   setPasswords({ ...passwords, confirmPass: e.target.value })
                 }
-                className="w-full border px-4 py-2 rounded mt-1"
+                className="w-full input"
                 placeholder="Confirm new password"
               />
               <span
@@ -234,17 +235,18 @@ const ForgetPassword = () => {
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
               </span>
             </div>
-            
+            {loading ? (
+              <Loading  width="100%"/>
+            ) : (
               <button
                 onClick={handlePasswordSubmit}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+                className="w-full red-button"
                 disabled={loading}
-              >{loading ? (
-              <Loading color="sucess" />
-            ) : (
-               " Update Password" )}
+              >
+                {" "}
+                Update Password
               </button>
-           
+            )}
           </>
         )}
 

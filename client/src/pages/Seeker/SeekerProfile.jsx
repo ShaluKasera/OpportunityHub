@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Button from "react-bootstrap/Button";
 import axios from "../../api/axios";
 
 import JobTabsSection from "./JobTabsSection";
 import toast from "react-hot-toast";
+import Loading from "../../components/Loading";
+import FileUpload from "../../components/FileUpload";
 
 const SeekerProfile = () => {
   const [user, setUser] = useState({ profilePic: "", name: "", email: "" });
@@ -23,6 +24,8 @@ const SeekerProfile = () => {
   const [jobOffers, setJobOffers] = useState([]);
   const [appliedJobsLoading, setAppliedJobsLoading] = useState(true);
   const [jobOffersLoading, setJobOffersLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [profil, setProfile] = useState(null);
   const pathname = window.location.pathname;
 
   useEffect(() => {
@@ -55,11 +58,21 @@ const SeekerProfile = () => {
   }, []);
 
   const updateProfile = async (profileData) => {
+    setLoading(true);
     try {
-      const res = await axios.put("/seeker/profile", profileData);
-      if (res.status === 200) toast("Profile updated successfully!",{id: `success-${pathname}`});
+      const res = await axios.put("/seeker/profile", profileData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (res.status === 200) window.location.reload();
+      toast.success("Profile updated successfully!", {
+        id: `success-${pathname}`,
+      });
     } catch (error) {
       console.error("Failed to update profile");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,25 +85,53 @@ const SeekerProfile = () => {
     const { name, value } = e.target;
     setJobSeeker((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    updateProfile({
-      name: user.name,
-      phone: jobSeeker.phone,
-      domain: jobSeeker.domain,
-      experienceYears: jobSeeker.experienceYears,
-      skills: jobSeeker.skills,
-      location: jobSeeker.location,
-      resumeUrl: jobSeeker.resumeUrl,
-      availabilityStatus: jobSeeker.availabilityStatus,
-    });
-    setIsProfileEditOpen(false);
+  const handleFile = (file) => {
+    setProfile(file);
   };
+  const handleSaveProfile = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-  const handleSaveProfessionalDetail = (e) => {
+  try {
+    const formData = new FormData();
+    formData.append("name", user.name);
+    formData.append("phone", jobSeeker.phone);
+    formData.append("domain", jobSeeker.domain);
+    formData.append("experienceYears", jobSeeker.experienceYears);
+    formData.append("location", jobSeeker.location);
+    formData.append("resumeUrl", jobSeeker.resumeUrl);
+    formData.append("availabilityStatus", jobSeeker.availabilityStatus);
+    jobSeeker.skills.forEach((skill, index) =>
+      formData.append(`skills[${index}]`, skill)
+    );
+
+    if (profil) {
+      formData.append("profilePic", profil);
+    }
+
+    const res = await axios.put("/seeker/profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (res.status === 200) {
+      toast.success("Profile updated successfully!");
+      window.location.reload();
+    }
+  } catch (error) {
+    console.error("Failed to update profile:", error);
+    toast.error("Failed to update profile.");
+  } finally {
+    setLoading(false);
+    setIsProfileEditOpen(false);
+  }
+};
+
+
+  const handleSaveProfessionalDetail = async (e) => {
     e.preventDefault();
-    updateProfile({
+    await updateProfile({
       name: user.name,
       phone: jobSeeker.phone,
       domain: jobSeeker.domain,
@@ -100,24 +141,25 @@ const SeekerProfile = () => {
       resumeUrl: jobSeeker.resumeUrl,
       availabilityStatus: jobSeeker.availabilityStatus,
     });
+
     setIsProfessionalEditOpen(false);
   };
 
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
-         const res = await axios.get("/seeker/all-applied-job");
-          if (res.data.success) {
-        const formattedJobs = res.data.applications.map((app) => ({
-          id: app.job.id,
-          title: app.job.title,
-          company: app.job.domain || "Unknown Company",
-        }));
-        setAppliedJobs(formattedJobs);
-      }
+        const res = await axios.get("/seeker/all-applied-job");
+        if (res.data.success) {
+          const formattedJobs = res.data.applications.map((app) => ({
+            id: app.job.id,
+            title: app.job.title,
+            company: app.job.domain || "Unknown Company",
+          }));
+          setAppliedJobs(formattedJobs);
+        }
       } catch (error) {
-         console.error("Error fetching applied jobs");
-      } finally{
+        console.error("Error fetching applied jobs");
+      } finally {
         setAppliedJobsLoading(false);
       }
     };
@@ -152,13 +194,15 @@ const SeekerProfile = () => {
     <div className="container px-4 py-6 max-w-4xl mx-auto space-y-10">
       {/* Profile Section */}
       <section className="relative bg-white p-6 rounded-xl border shadow">
-        <p className="text-2xl sm:text-3xl font-bold mb-4">Profile</p>
-        <button
-          className="red-button"
-          onClick={() => setIsProfileEditOpen(true)}
-        >
-          Edit
-        </button>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+          <p className="text-xl sm:text-2xl font-bold">Professional Details</p>
+          <button
+            className="red-button !w-20 mt-2 sm:mt-0"
+            onClick={() => setIsProfileEditOpen(true)}
+          >
+            Edit
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-y-4 sm:gap-x-10 px-2">
           <img
             src={user.profilePic}
@@ -175,13 +219,15 @@ const SeekerProfile = () => {
 
       {/* Professional Details Section */}
       <section className="relative bg-white p-4 sm:p-6 rounded-xl border shadow space-y-4 text-sm sm:text-base">
-        <p className="text-xl sm:text-2xl font-bold">Professional Details</p>
-        <button
-          className="red-button"
-          onClick={() => setIsProfessionalEditOpen(true)}
-        >
-          Edit
-        </button>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+          <p className="text-xl sm:text-2xl font-bold">Professional Details</p>
+          <button
+            className="red-button !w-20 mt-2 sm:mt-0"
+            onClick={() => setIsProfessionalEditOpen(true)}
+          >
+            Edit
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-gray-700">
           <div>
@@ -260,14 +306,7 @@ const SeekerProfile = () => {
               value={user.name}
               onChange={handleProfileChange}
               placeholder="Name"
-              className="w-full border p-2 rounded mt-2"
-            />
-            <input
-              type="email"
-              name="email"
-              value={user.email}
-              disabled
-              className="w-full border mt-2 p-2 rounded"
+              className="w-full input"
             />
             <input
               type="text"
@@ -275,15 +314,16 @@ const SeekerProfile = () => {
               value={jobSeeker.location}
               onChange={handleProfessionalChange}
               placeholder="Location"
-              className="w-full mt-2 border p-2 rounded"
+              className="w-full input mb-2"
             />
-            <Button
-              variant="outline-danger"
-              onClick={handleSaveProfile}
-              className="w-full mt-4"
-            >
-              Save
-            </Button>
+            <FileUpload className="!mt-2" label="Upload Company Logo" onChange={handleFile} />
+            {loading ? (
+              <Loading width="100%" />
+            ) : (
+              <button onClick={handleSaveProfile} className="red-button">
+                Save
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -305,7 +345,7 @@ const SeekerProfile = () => {
               value={jobSeeker.phone}
               onChange={handleProfessionalChange}
               placeholder="Phone"
-              className="w-full border p-2 mt-2 rounded"
+              className="w-full input"
             />
             <input
               type="text"
@@ -313,7 +353,7 @@ const SeekerProfile = () => {
               value={jobSeeker.domain}
               onChange={handleProfessionalChange}
               placeholder="Domain"
-              className="w-full mt-2 border p-2 rounded"
+              className="w-full input"
             />
             <input
               type="text"
@@ -321,7 +361,7 @@ const SeekerProfile = () => {
               value={jobSeeker.experienceYears}
               onChange={handleProfessionalChange}
               placeholder="Experience (Years)"
-              className="w-full mt-2 border p-2 rounded"
+              className="w-full input"
             />
             <input
               type="text"
@@ -334,7 +374,7 @@ const SeekerProfile = () => {
                 }))
               }
               placeholder="Skills (comma-separated)"
-              className="w-full border p-2 mt-2 rounded"
+              className="w-full input"
             />
             <input
               type="text"
@@ -342,26 +382,30 @@ const SeekerProfile = () => {
               value={jobSeeker.resumeUrl}
               onChange={handleProfessionalChange}
               placeholder="Resume URL"
-              className="w-full mt-2 border p-2 rounded"
+              className="w-full input"
             />
             <select
               name="availabilityStatus"
               value={jobSeeker.availabilityStatus}
               onChange={handleProfessionalChange}
-              className="w-full border p-2 mt-2 rounded"
+              className="w-full input"
             >
               <option value="">Select Availability</option>
               <option value="available">Available</option>
               <option value="employed">Employed</option>
               <option value="unavailable">Unavailable</option>
             </select>
-            <Button
-              variant="outline-danger"
-              onClick={handleSaveProfessionalDetail}
-              className="w-full mt-4"
-            >
-              Save
-            </Button>
+            {loading ? (
+              <Loading width="100%" />
+            ) : (
+              <button
+                variant="outline-danger"
+                onClick={handleSaveProfessionalDetail}
+                className="red-button"
+              >
+                Save
+              </button>
+            )}
           </div>
         </div>
       )}

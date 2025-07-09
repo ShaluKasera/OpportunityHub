@@ -12,11 +12,10 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const consent = localStorage.getItem("cookieConsent");
 
-    // Only proceed if user accepted cookie usage
     if (consent === "accepted") {
-      fetchUserData(); // Get user + role from server using cookie
+      fetchUserData(); 
     } else {
-      setLoading(false); // No cookie consent = no login attempt
+      setLoading(false);
     }
   }, []);
 

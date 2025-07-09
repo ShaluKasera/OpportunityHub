@@ -10,7 +10,6 @@ instance.interceptors.response.use(
   (res) => {
     if (res?.data?.success === false) {
       const message = res.data.message || "Something went wrong";
-
       const pathname = window.location.pathname;
 
       toast.error(message, { id: `error-${pathname}` });
@@ -19,15 +18,23 @@ instance.interceptors.response.use(
     return res;
   },
   (err) => {
-    console.log("error: ", err);
+    const status = err.response?.status;
     const pathname = window.location.pathname;
-    const errorMessage = err.response?.data?.message || "Server error";
 
+    // Suppress toast for 401 errors
+    if (status === 401) {
+      // Optional: handle redirect to login or silent logout logic
+      return Promise.reject(err);
+    }
+
+    const errorMessage = err.response?.data?.message || "Server error";
     toast.error(errorMessage, {
-      id: `err-error-${pathname}`, // unique toast per route
+      id: `err-error-${pathname}`,
     });
+
     return Promise.reject(err);
   }
 );
+
 
 export default instance;

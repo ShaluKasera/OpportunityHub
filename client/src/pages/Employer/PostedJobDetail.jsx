@@ -169,14 +169,15 @@ const PostedJobDetail = () => {
                 className="mt-4 flex px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-all duration-300"
               >
                 <span className="font-bold  me-2">←</span> Back
+                
               </button>
-               <button
+               {sending ? <Loading width="304px" /> :<button
                 onClick={handleSendOffers}
                 disabled={sending}
                 className="red-button !w-76 "
               >
-                {sending ? <Loading /> : "Send Offer to Relevant Seekers"}
-              </button>
+                Send Offer to Relevant Seekers
+              </button> }
             </div>
           </>
         ) : (

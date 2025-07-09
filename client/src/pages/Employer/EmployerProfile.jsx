@@ -127,7 +127,7 @@ const EmployerProfile = () => {
   };
 
   // SAVE COMPANY BUTTON
-  const handleSaveCompany = (e) => {
+  const handleSaveCompany = async(e) => {
     e.preventDefault();
 
     const profileData = {
@@ -140,7 +140,7 @@ const EmployerProfile = () => {
       description: employer.description,
     };
 
-    updateProfile(profileData);
+    await updateProfile(profileData);
     setIsCompanyEditOpen(false);
   };
 
@@ -246,7 +246,7 @@ const EmployerProfile = () => {
               value={user.name}
               onChange={handleProfileChange}
               placeholder="Name"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <FileUpload label="Upload Company Logo" onChange={handleFile} />
             {loading ? (
@@ -284,7 +284,7 @@ const EmployerProfile = () => {
               value={employer.companyName}
               onChange={handleCompanyChange}
               placeholder="Company Name"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <input
               type="text"
@@ -292,7 +292,7 @@ const EmployerProfile = () => {
               value={employer.industry}
               onChange={handleCompanyChange}
               placeholder="Industry"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <input
               type="text"
@@ -300,7 +300,7 @@ const EmployerProfile = () => {
               value={employer.companySize}
               onChange={handleCompanyChange}
               placeholder="Company Size (e.g., 11-50)"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <input
               type="text"
@@ -308,7 +308,7 @@ const EmployerProfile = () => {
               value={employer.location}
               onChange={handleCompanyChange}
               placeholder="Location"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <input
               type="text"
@@ -316,21 +316,21 @@ const EmployerProfile = () => {
               value={employer.phone}
               onChange={handleCompanyChange}
               placeholder="Phone"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
             />
             <textarea
               name="description"
               value={employer.description}
               onChange={handleCompanyChange}
               placeholder="Company Description"
-              className="w-full border p-2 mb-2 rounded focus:outline-none focus:ring-1 focus:ring-red-700"
+              className="w-full input"
               rows={4}
             />
             {loading ? (
               <Loading width="100%"/>
             ) : (
               <button
-                onClick={handleCompanyChange}
+                onClick={handleSaveCompany}
                 disabled={loading}
                 className="red-button"
               >
